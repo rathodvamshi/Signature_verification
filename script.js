@@ -1,4 +1,4 @@
-function verifySignature() {
+function uploadSignature() {  // Changed function name
     const fileInput = document.getElementById('signatureUpload');
     const resultDiv = document.getElementById('result');
     
@@ -12,13 +12,13 @@ function verifySignature() {
     const reader = new FileReader();
 
     reader.onload = function(event) {
-        // Simulated verification
-        resultDiv.textContent = 'Signature verification in progress...';
+        // Simulated upload
+        resultDiv.textContent = 'Uploading signature...';
         resultDiv.style.color = 'blue';
         
-        // Simulate verification delay
+        // Simulate upload delay
         setTimeout(() => {
-            resultDiv.textContent = 'Signature verification complete. (This is a placeholder message.)';
+            resultDiv.textContent = 'Signature uploaded successfully. (This is a placeholder message.)';
             resultDiv.style.color = 'green';
         }, 2000);
     };

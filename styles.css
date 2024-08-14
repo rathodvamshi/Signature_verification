@@ -127,6 +127,70 @@ footer {
     bottom: 0;
 }
 
+.gif-container {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    animation: blink 5s infinite;
+}
+
+.left-gif {
+    left: 10px;
+}
+
+.right-gif {
+    right: 10px;
+}
+
+.gif-container img {
+    width: 250px; /* Adjust size of the GIF */
+    height: auto;
+}
+
+.scrolling-link {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    background-color: #0facd3;
+    color: white;
+    border-radius: 50%;
+    width: 200px;
+    height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    animation: scroll 5s linear infinite;
+}
+
+.scrolling-link a {
+    color: white;
+    text-decoration: none;
+    font-size: 1em;
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+@keyframes scroll {
+    0% { top: 0; }
+    100% { top: 100%; }
+}
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+
 @keyframes fadeIn {
     from { opacity: 0; }
     to { opacity: 1; }
