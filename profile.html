@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="styles1.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h1>Signature Verification System</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="profile-section">
+            <h2>Your Profile</h2>
+            <form id="profileForm">
+                <div class="form-group">
+                    <label for="bio">Bio:</label>
+                    <textarea id="bio" name="bio" rows="4" placeholder="Enter your bio here..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="profilePic">Profile Picture:</label>
+                    <input type="file" id="profilePic" accept="image/*">
+                </div>
+                <div class="form-group">
+                    <label for="postImage">Post an Image:</label>
+                    <input type="file" id="postImage" accept="image/*">
+                    <button type="button" onclick="uploadPostImage()">Post Image</button>
+                </div>
+                <button type="submit">Save Profile</button>
+            </form>
+            <div id="profilePicPreview" class="image-preview"></div>
+            <div id="postImages" class="image-preview"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Signature Verification System</p>
+    </footer>
+
+    <script src="script1.js"></script>
+</body>
+</html>

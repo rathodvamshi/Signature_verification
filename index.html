@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signature Verification System</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <div class="logo">
+            <img src="logo.png" alt="Logo">
+            <h1>Signature Verification System</h1>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <section class="hero">
+            <h2>Welcome to Signature Verification</h2>
+            <p>Upload your signature to verify its authenticity.</p>
+        </section>
+        <section class="upload-section">
+            <h2>Upload Signature</h2>
+            <input type="file" id="signatureUpload" accept="image/*">
+            <button onclick="verifySignature()">Verify</button>
+            <div id="result"></div>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2024 Signature Verification System</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
