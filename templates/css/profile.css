@@ -1,0 +1,315 @@
+/* Base styles */
+body {
+    font-family: Calibri, sans-serif;
+    background-color: rgb(239, 228, 228);
+    color: #000000;
+    margin: 0;
+    padding: 0;
+    transition: background-color 0.3s ease, color 0.3s ease, background-image 0.3s ease;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* Navbar styles */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 5px;
+    background-color: #ffffff; /* Change navbar background color */
+    color: #0e0e0e;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+}
+
+.logo img {
+    margin-left: 30px;
+    border-radius: 50px;
+    width: 70px;
+    height: 60px;
+    margin-right: 8px;
+}
+
+.nav-links {
+    list-style: none;
+    display: flex;
+}
+
+.nav-links li {
+    margin: 0 15px;
+}
+
+.nav-links li a {
+    color: #0a0a0a;
+    text-decoration: none;
+    font-size: 18px;
+    transition: color 0.3s ease;
+}
+
+.nav-links li a:hover {
+    color: #ff6347;
+    text-shadow: 0 0 5px rgba(255, 99, 71, 0.7);
+}
+
+/* Mode toggle styles */
+.mode-toggle {
+    display: flex;
+    gap: 10px;
+    border-radius: 50px;
+}
+
+.mode-toggle img.mode-icon {
+    height: 30px;
+    width: 30px;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.mode-toggle img.mode-icon:hover {
+    transform: scale(1.2);
+}
+
+/* 3D Animated Content */
+.container section {
+    padding: 60px 30px 20px;
+    transform-style: preserve-3d;
+    perspective: 1000px;
+}
+
+.container section:hover {
+    transform: rotateY(10deg) rotateX(5deg);
+}
+
+/* Dark mode styles */
+body.dark-mode {
+    background-color: #060606;
+    color: #e0e0e0;
+}
+body.dark-mode .intro p {
+    color: #fff; /* White text for dark mode */
+}
+body.dark-mode .navbar {
+    background-color: #fffcfc;
+}
+
+body.dark-mode .mode-toggle img.mode-icon {
+    filter: invert(100%);
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .nav-links {
+        display: none; /* Hide nav links by default on mobile */
+        flex-direction: column;
+        background-color: #f2ebeb; /* Match navbar background */
+        position: absolute;
+        top: 60px; /* Below navbar */
+        right: 0;
+        width: 200px; /* Set width */
+        padding: 10px 0;
+        border-radius: 5px; /* Optional: rounded corners */
+        z-index: 999; /* Ensure menu is on top */
+    }
+    
+    .nav-links.active {
+        display: flex; /* Show nav links when active */
+    }
+
+    .menu-toggle {
+        display: block; /* Show the toggle button on mobile */
+    }
+
+    .nav-links li {
+        margin: 10px 0; /* Adjust margin for list */
+    }
+}
+.profile-image{
+    width: 120px;
+    height: 110px;
+    border: 3px solid rgb(199, 104, 32);
+    border-radius: 50px;
+}
+/* Profile Page Styles */
+.profile-container {
+    margin-top: 250px;
+    margin-left: 400px;
+    padding: 20px;
+    max-width: 800px;
+    width: 60%; /* Optional: Adjust to make it responsive */
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+body.dark-mode .profile-container {
+    background-color: #4a8392;
+}
+.profile-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+/* .profile-info img {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    margin-right: 20px;
+    border: 3px solid #ff6347;
+    transition: transform 0.3s ease;
+} */
+.pic {
+    border-radius: 50px;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#post-upload-input {
+    margin-bottom: 15px;
+    display: block;
+    margin: 0 auto;
+}
+
+#image-preview {
+    display: none;
+    border-radius: 50px;
+    max-width: 200px;
+    max-height: 200px;
+    border: 2px solid #ccc;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+
+.profile-info img:hover {
+    transform: scale(1.1);
+}
+
+.details h2 {
+    margin: 0;
+    font-size: 24px;
+}
+
+.details p {
+    margin: 5px 0 0 20px;
+}
+
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #ff6347;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:hover {
+    background-color: #ff4500;
+    transform: scale(1.05);
+}
+/* Popup Styles */
+.popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 9999;
+}
+
+.popup-content {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    text-align: center; /* Optional: Center-align text */
+    animation: scaleUp 0.3s ease;
+}
+
+.popup input, .popup textarea {
+    width: 90%;
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+body.dark-mode .popup-content {
+    background-color: #487579;
+}
+
+.popup button {
+    width: 100%;
+    padding: 10px;
+    background-color: #ff6347;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.popup button:hover {
+    background-color: #ff4500;
+}
+
+.popup.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+
+/* Media Query for Popup */
+@keyframes scaleUp {
+    0% {
+        transform: scale(0.7);
+        opacity: 0.5;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.hidden {
+    visibility: hidden;
+    opacity: 0;
+}
+
+/* Initially hidden */
+#edit-popup {
+    display: none;
+    /* Additional styling for the popup */
+}
+
+/* Show the popup */
+#edit-popup.show {
+    display: block;
+}
+
+/* Optional: Hidden state */
+#edit-popup.hidden {
+    display: none;
+}

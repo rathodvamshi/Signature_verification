@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href='css/profile.css'>
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="logo">
+            <img src="https://i.pinimg.com/564x/05/8c/02/058c02ca15b75b634b40fcdbf36f5a5f.jpg" alt="Logo">
+            <h1>Signature Verification</h1>
+        </div>
+        <ul class="nav-links">
+            <li><a href="./index.html">Back</a></li>
+            <li><a href="#template">History</a></li>
+            <li><a href="./login.html">Login</a></li>
+            <li><a href="./signup.html">Signup</a></li>
+            <li class="mode-toggle" onclick="toggleMode()">
+                <img id="moonIcon" src="https://i.pinimg.com/564x/c2/1b/06/c21b068e9cc106913f482690dcd104fa.jpg" alt="Moon Mode" class="mode-icon">
+            </li>
+        </ul>
+    </nav>
+    <div class="profile-container">
+        <div class="profile-info">
+            <div class="pic">
+                <img id="profile-pic" src="https://i.pinimg.com/736x/49/49/40/494940d842c38cd9fd6de378b0caadb7.jpg" alt="Default Profile Picture" class="profile-image">
+            </div>
+            <div class="details">
+                <h1>Welcome, <span id="username"></span></h1>
+                <p>Email: <span id="email"></span></p>
+                <p>Age: <span id="age"></span></p>
+                <p>College: <span id="college"></span></p>
+                <p>Bio: <span id="bio"></span></p>
+                <button id="edit-profile">Edit Profile</button>
+                <button id="logout" onclick="window.location.href='/logout';">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-popup" class="hidden">
+    <div class="popup-content">
+        <!-- Profile Edit Form -->
+        <input id="edit-email" type="email" placeholder="enter email"/>
+        <input id="edit-age" type="number" placeholder="enter age" />
+        <input id="edit-college" type="text" placeholder="enter college"/>
+        <textarea id="edit-bio" placeholder="enter bio"></textarea>
+
+        <!-- Close button -->
+        <button id="close-popup">Close</button>
+        <button id="update-details">Update Details</button>
+    </div>
+</div>
+</body>
+<script src="./js/profile.js"></script>
+</html>
+
+
+
