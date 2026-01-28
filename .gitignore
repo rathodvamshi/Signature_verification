@@ -1,4 +1,5 @@
     #########
+    #########
     # Global ignore for Python/Node project
     #########
 
@@ -70,4 +71,3 @@
     # If you decide to exclude models entirely, uncomment below
     # js/trained_models/
     # trained_models/
-
