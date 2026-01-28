@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
     age: { type: Number },
     college: { type: String },
     bio: { type: String },
-    profileImage: { type: String } // Path to profile image
+    profileImage: { type: String }, // Path to profile image
+    tokenVersion: { type: Number, default: 0 } // Used for invalidating tokens
 }, {
     timestamps: true // Adds createdAt and updatedAt fields
 });

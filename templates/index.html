@@ -508,10 +508,11 @@
     <!-- Demo Script -->
     <script>
         let currentStep = 1;
-        let demoUsername = "Alex Morgan";
         let isAutoPlaying = true;
-        const cursor = document.getElementById('demo-cursor');
         let demoTimeouts = [];
+        const cursor = document.getElementById('demo-cursor');
+        const demoNames = ["Vamshi", "Vijay", "Yash"];
+        let currentNameIndex = 0;
 
         function clearDemoTimeouts() {
             demoTimeouts.forEach(t => clearTimeout(t));
@@ -524,9 +525,10 @@
             return t;
         }
 
-        // Helper to get element coordinates relative to window-body
         function getCoords(el) {
-            const bodyRect = document.getElementById('demo-window-body').getBoundingClientRect();
+            const body = document.getElementById('demo-window-body');
+            if (!el || !body) return { x: 150, y: 150 };
+            const bodyRect = body.getBoundingClientRect();
             const rect = el.getBoundingClientRect();
             return {
                 x: rect.left - bodyRect.left + (rect.width / 2),
@@ -535,20 +537,22 @@
         }
 
         function moveCursor(targetEl, type = '', callback) {
+            if (!cursor) { if (callback) callback(); return; }
             cursor.className = 'demo-cursor ' + type;
-            const coords = typeof targetEl === 'object' ? getCoords(targetEl) : { x: 150, y: 150 };
+            const coords = targetEl && typeof targetEl === 'object' ? getCoords(targetEl) : { x: 150, y: 150 };
             cursor.style.transform = `translate(${coords.x}px, ${coords.y}px)`;
 
-            if (targetEl.classList) {
+            if (targetEl && targetEl.classList) {
                 setDemoTimeout(() => targetEl.classList.add('demo-hovered'), 300);
             }
 
             setDemoTimeout(() => {
                 if (callback) callback();
-            }, 600); // Faster movement
+            }, 600);
         }
 
         function clickCursor(targetEl, callback) {
+            if (!cursor) { if (callback) callback(); return; }
             cursor.classList.add('clicking');
             setDemoTimeout(() => {
                 cursor.classList.remove('clicking');
@@ -556,13 +560,13 @@
                     targetEl.classList.remove('demo-hovered');
                 }
                 if (callback) callback();
-            }, 300); // Faster click
+            }, 300);
         }
 
         function typeWriter(text, elementId, callback) {
             let i = 0;
             const element = document.getElementById(elementId);
-            if (!element) return;
+            if (!element) { if (callback) callback(); return; }
             element.value = "";
 
             function type() {
@@ -583,15 +587,11 @@
             document.querySelectorAll('.demo-nav-dot').forEach(d => d.classList.remove('active'));
 
             const target = document.getElementById(`demo-step-${step}`);
-            if (target) {
-                target.classList.add('active');
-                document.getElementById(`dot-${step}`).classList.add('active');
-                currentStep = step;
-            }
+            const dot = document.getElementById(`dot-${step}`);
+            if (target) target.classList.add('active');
+            if (dot) dot.classList.add('active');
+            currentStep = step;
         }
-
-        const demoNames = ["Vamshi", "Vijay", "Yash"];
-        let currentNameIndex = 0;
 
         function runAutoDemo() {
             if (!isAutoPlaying) return;
@@ -603,27 +603,30 @@
             const demoName = demoNames[currentNameIndex] || "User";
             currentNameIndex = (currentNameIndex + 1) % demoNames.length;
 
-            // Update display name immediately
-            document.querySelectorAll('[id="display-username"]').forEach(el => el.innerText = demoName);
+            document.querySelectorAll('[id="display-username"]').forEach(el => {
+                if (el) el.innerText = demoName;
+            });
 
-            // Ensure cursor is fresh
-            cursor.style.transition = 'none';
-            cursor.style.transform = `translate(20px, 20px)`;
-            cursor.className = 'demo-cursor';
-            cursor.style.opacity = '1';
+            if (cursor) {
+                cursor.style.transition = 'none';
+                cursor.style.transform = `translate(20px, 20px)`;
+                cursor.className = 'demo-cursor';
+                cursor.style.opacity = '1';
+            }
 
             setDemoTimeout(() => {
-                cursor.style.transition = '';
+                if (cursor) cursor.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.3s ease';
 
                 const input = document.getElementById('demo-username');
+                if (!input) return;
+
                 moveCursor(input, 'text', () => {
                     clickCursor(input, () => {
                         input.focus();
                         typeWriter(demoName, 'demo-username', () => {
-                            document.querySelectorAll('[id="display-username"]').forEach(el => el.innerText = demoName);
-
                             setDemoTimeout(() => {
                                 const nextBtn = document.querySelector('#demo-step-1 .demo-btn');
+                                if (!nextBtn) return;
                                 moveCursor(nextBtn, 'pointer', () => {
                                     clickCursor(nextBtn, () => {
                                         nextDemoStep(2);
@@ -640,13 +643,17 @@
         function runStep2(name) {
             setDemoTimeout(() => {
                 const uploadZone = document.getElementById('demo-upload-zone');
+                if (!uploadZone) return;
                 moveCursor(uploadZone, 'pointer', () => {
                     clickCursor(uploadZone, () => {
-                        document.getElementById('upload-content').style.display = 'none';
-                        document.getElementById('uploaded-img').style.display = 'block';
+                        const content = document.getElementById('upload-content');
+                        const img = document.getElementById('uploaded-img');
+                        if (content) content.style.display = 'none';
+                        if (img) img.style.display = 'block';
 
                         setDemoTimeout(() => {
                             const analyseBtn = document.getElementById('analyse-btn');
+                            if (!analyseBtn) { startAnalysis(name); return; }
                             analyseBtn.style.display = 'flex';
                             moveCursor(analyseBtn, 'pointer', () => {
                                 clickCursor(analyseBtn, () => {
@@ -661,99 +668,123 @@
 
         function startAnalysis(name) {
             nextDemoStep(3);
-            cursor.style.opacity = '0';
+            if (cursor) cursor.style.opacity = '0';
             const windowEl = document.querySelector('.app-window');
             if (windowEl) windowEl.classList.remove('success-state', 'genuine-glow', 'forged-glow');
 
+            // Phase 1: Feature Extraction
             setDemoTimeout(() => {
                 const p1 = document.getElementById('p-step-1');
                 if (p1) p1.innerHTML = '<span>Features Extracted</span> <i class="fas fa-check-circle" style="color: #22c55e;"></i>';
+
                 const p2 = document.getElementById('p-step-2');
                 if (p2) {
                     p2.classList.add('active');
                     p2.innerHTML = '<i class="fas fa-microchip fa-spin"></i> <span>Neural Matching</span>';
                 }
+            }, 600);
 
-                setDemoTimeout(() => {
+            // Phase 2: Neural Matching + Result
+            setDemoTimeout(() => {
+                try {
                     showResult(name);
-                }, 800);
-            }, 500);
+                } catch (e) {
+                    console.error("Demo Result Error:", e);
+                    nextDemoStep(4);
+                }
+            }, 1400);
         }
 
         function showResult(name) {
-            const isGenuine = Math.random() > 0.4;
-            const resultCard = document.getElementById('demo-result-card');
-            const badge = document.getElementById('demo-result-badge');
-            const title = document.getElementById('demo-verdict-title');
-            const desc = document.getElementById('demo-verdict-desc');
-            const ring = document.getElementById('demo-confidence-ring');
-            const text = document.getElementById('demo-confidence-text');
-            const suggList = document.getElementById('suggestion-list');
-            const windowEl = document.querySelector('.app-window');
+            try {
+                const isGenuine = Math.random() > 0.4;
+                const resultCard = document.getElementById('demo-result-card');
+                const badge = document.getElementById('demo-result-badge');
+                const title = document.getElementById('demo-verdict-title');
+                const desc = document.getElementById('demo-verdict-desc');
+                const ring = document.getElementById('demo-confidence-ring');
+                const confText = document.getElementById('demo-confidence-text');
+                const suggList = document.getElementById('suggestion-list');
+                const windowEl = document.querySelector('.app-window');
 
-            if (!resultCard || !badge || !title || !desc || !ring || !text || !suggList || !windowEl) return;
+                if (resultCard) resultCard.classList.remove('forged', 'blink-alert');
 
-            resultCard.classList.remove('forged', 'blink-alert');
-            document.getElementById('success-rays').classList.remove('active');
-            document.getElementById('demo-check-container').classList.remove('active');
+                const rays = document.getElementById('success-rays');
+                const check = document.getElementById('demo-check-container');
+                const chart = document.getElementById('demo-circular-chart');
 
-            if (isGenuine) {
-                windowEl.classList.add('success-state', 'genuine-glow');
-                document.getElementById('success-rays').classList.add('active');
-                document.getElementById('demo-check-container').classList.add('active');
-                document.getElementById('demo-circular-chart').style.display = 'none';
-                document.getElementById('demo-confidence-text').style.display = 'none';
+                if (rays) rays.classList.remove('active');
+                if (check) check.classList.remove('active');
 
-                badge.innerText = "AUTHENTIC";
-                badge.style.background = "#22c55e";
-                title.innerText = "Signature Verified";
-                desc.innerHTML = `Identity confirmed for <b>${name}</b>`;
+                if (isGenuine) {
+                    if (windowEl) windowEl.classList.add('success-state', 'genuine-glow');
+                    if (rays) rays.classList.add('active');
+                    if (check) check.classList.add('active');
+                    if (chart) chart.style.display = 'none';
+                    if (confText) confText.style.display = 'none';
 
-                suggList.innerHTML = `
-                    <li><i class="fas fa-shield-check"></i> Stroke velocity within 0.02s variance</li>
-                    <li><i class="fas fa-shield-check"></i> Pressure mapping matches baseline</li>
-                    <li><i class="fas fa-shield-check"></i> Fluidity index: 98% (Premium)</li>
-                `;
+                    if (badge) {
+                        badge.innerText = "AUTHENTIC";
+                        badge.style.background = "#22c55e";
+                    }
+                    if (title) title.innerText = "Signature Verified";
+                    if (desc) desc.innerHTML = `Identity confirmed for <b>${name}</b>`;
+                    if (suggList) {
+                        suggList.innerHTML = `
+                            <li><i class="fas fa-shield-check"></i> Stroke velocity within 0.02s variance</li>
+                            <li><i class="fas fa-shield-check"></i> Pressure mapping matches baseline</li>
+                            <li><i class="fas fa-shield-check"></i> Fluidity index: 98.4% (Premium)</li>
+                        `;
+                    }
 
-                const colors = ['#22c55e', '#6366f1', '#f59e0b', '#ec4899', '#3b82f6'];
-                for (let i = 0; i < 35; i++) {
-                    const p = document.createElement('div');
-                    p.className = 'confetti';
-                    p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                    p.style.left = (Math.random() * 80 + 10) + '%';
-                    p.style.top = '-10px';
-                    p.style.width = (Math.random() * 8 + 4) + 'px';
-                    p.style.height = (Math.random() * 10 + 5) + 'px';
-                    p.style.animation = `confettiFall ${Math.random() * 1.5 + 1}s linear forwards`;
-                    p.style.transform = `rotate(${Math.random() * 360}deg)`;
-                    windowEl.appendChild(p);
-                    setTimeout(() => p.remove(), 2500);
+                    if (windowEl) {
+                        const colors = ['#22c55e', '#6366f1', '#f59e0b', '#ec4899', '#3b82f6'];
+                        for (let i = 0; i < 35; i++) {
+                            const p = document.createElement('div');
+                            p.className = 'confetti';
+                            p.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                            p.style.left = (Math.random() * 80 + 10) + '%';
+                            p.style.top = '-10px';
+                            p.style.width = (Math.random() * 8 + 4) + 'px';
+                            p.style.height = (Math.random() * 10 + 5) + 'px';
+                            p.style.animation = `confettiFall ${Math.random() * 1.5 + 1}s linear forwards`;
+                            p.style.transform = `rotate(${Math.random() * 360}deg)`;
+                            windowEl.appendChild(p);
+                            setTimeout(() => p.remove(), 2500);
+                        }
+                    }
+                } else {
+                    if (windowEl) windowEl.classList.add('success-state', 'forged-glow');
+                    if (resultCard) resultCard.classList.add('forged', 'blink-alert');
+                    if (chart) chart.style.display = 'block';
+                    if (confText) confText.style.display = 'block';
+
+                    if (badge) {
+                        badge.innerText = "FORGERY";
+                        badge.style.background = "#ef4444";
+                    }
+                    if (title) title.innerText = "Access Denied";
+                    if (desc) desc.innerHTML = `Anomaly detected for <b>${name}</b>`;
+                    if (ring) ring.setAttribute('stroke-dasharray', '8, 100');
+                    if (confText) confText.innerText = "08%";
+                    if (suggList) {
+                        suggList.innerHTML = `
+                            <li><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Trace-rest hesitation in mid-stroke</li>
+                            <li><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Structural variance: 92% (Suspicious)</li>
+                            <li><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Artificial tremor pattern detected</li>
+                        `;
+                    }
                 }
-            } else {
-                windowEl.classList.add('success-state', 'forged-glow');
-                resultCard.classList.add('forged', 'blink-alert');
-                document.getElementById('demo-circular-chart').style.display = 'block';
-                document.getElementById('demo-confidence-text').style.display = 'block';
-
-                badge.innerText = "FORGERY";
-                badge.style.background = "#ef4444";
-                title.innerText = "Access Denied";
-                desc.innerHTML = `Anomaly detected for <b>${name}</b>`;
-                ring.setAttribute('stroke-dasharray', '8, 100');
-                text.innerText = "08%";
-                suggList.innerHTML = `
-                    <li><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Trace-rest hesitation in mid-stroke</li>
-                    <li><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Structural variance: 92% (Suspicious)</li>
-                    <li><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Artificial tremor pattern detected</li>
-                `;
+            } catch (e) {
+                console.error("Error showing result:", e);
             }
 
             nextDemoStep(4);
-            cursor.style.opacity = '1';
+            if (cursor) cursor.style.opacity = '1';
 
             setDemoTimeout(() => {
                 const restartBtn = document.getElementById('demo-restart');
-                if (!restartBtn) return;
+                if (!restartBtn) { runAutoDemo(); return; }
                 restartBtn.style.pointerEvents = 'auto';
                 moveCursor(restartBtn, 'pointer', () => {
                     clickCursor(restartBtn, () => {
@@ -764,25 +795,41 @@
         }
 
         function resetDemoState() {
-            document.querySelector('.app-window').classList.remove('success-state', 'genuine-glow', 'forged-glow');
-            document.querySelectorAll('.emoji-particle, .confetti').forEach(p => p.remove());
-            document.getElementById('success-rays').classList.remove('active');
-            document.getElementById('demo-check-container').classList.remove('active');
-            document.getElementById('demo-circular-chart').style.display = 'block';
-            document.getElementById('demo-confidence-text').style.display = 'block';
-            document.getElementById('demo-username').value = "";
-            document.getElementById('upload-content').style.display = 'flex';
-            document.getElementById('uploaded-img').style.display = 'none';
-            document.getElementById('analyse-btn').style.display = 'none';
-            const p1 = document.getElementById('p-step-1');
-            if (p1) p1.innerHTML = '<i class="fas fa-circle"></i> <span>Extracting</span>';
-            const p2 = document.getElementById('p-step-2');
-            if (p2) {
-                p2.classList.remove('active');
-                p2.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Matching</span>';
+            try {
+                const windowEl = document.querySelector('.app-window');
+                if (windowEl) windowEl.classList.remove('success-state', 'genuine-glow', 'forged-glow');
+                document.querySelectorAll('.emoji-particle, .confetti').forEach(p => p.remove());
+
+                const rays = document.getElementById('success-rays');
+                const check = document.getElementById('demo-check-container');
+                const chart = document.getElementById('demo-circular-chart');
+                const confText = document.getElementById('demo-confidence-text');
+                const usernameInput = document.getElementById('demo-username');
+                const content = document.getElementById('upload-content');
+                const img = document.getElementById('uploaded-img');
+                const analyseBtn = document.getElementById('analyse-btn');
+                const p1 = document.getElementById('p-step-1');
+                const p2 = document.getElementById('p-step-2');
+
+                if (rays) rays.classList.remove('active');
+                if (check) check.classList.remove('active');
+                if (chart) chart.style.display = 'block';
+                if (confText) confText.style.display = 'block';
+                if (usernameInput) usernameInput.value = "";
+                if (content) content.style.display = 'flex';
+                if (img) img.style.display = 'none';
+                if (analyseBtn) analyseBtn.style.display = 'none';
+
+                if (p1) p1.innerHTML = '<i class="fas fa-circle"></i> <span>Extracting</span>';
+                if (p2) {
+                    p2.classList.remove('active');
+                    p2.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Matching</span>';
+                }
+                document.querySelectorAll('.demo-hovered').forEach(el => el.classList.remove('demo-hovered'));
+                if (cursor) cursor.style.opacity = '0';
+            } catch (e) {
+                console.error("Reset Error:", e);
             }
-            document.querySelectorAll('.demo-hovered').forEach(el => el.classList.remove('demo-hovered'));
-            cursor.style.opacity = '0';
         }
 
         let demoStarted = false;

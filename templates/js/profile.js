@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // ============================================
     const fetchUserDetails = async () => {
         try {
-            const response = await fetch('/get-user-details');
+            const response = await fetch('/api/user/profile');
 
             if (response.status === 401) {
                 // Not logged in, redirect to login
@@ -120,9 +120,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const response = await fetch('/update-profile', {
+            const response = await fetch('/api/user/profile', {
                 method: 'POST',
-                // No Content-Type header needed for FormData; browser sets it with boundary
                 body: formData
             });
 
@@ -135,7 +134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 // Update Image immediately if returned
                 if (result.profileImage && elements.profilePic) {
-                    // Add timestamp to force reload
                     elements.profilePic.src = `${result.profileImage}?t=${new Date().getTime()}`;
                 }
 
@@ -154,7 +152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 window.AppUtils.showToast(error.message || 'Failed to update profile', 'error');
             }
         } finally {
-            // Remove loading state
             if (elements.updateBtn && window.AppUtils) {
                 window.AppUtils.setLoading(elements.updateBtn, false);
             }
@@ -176,7 +173,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         elements.updateBtn.addEventListener('click', updateProfile);
     }
 
-    // Close popup when clicking outside
     if (elements.editPopup) {
         elements.editPopup.addEventListener('click', (e) => {
             if (e.target === elements.editPopup) {
@@ -185,19 +181,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Logout Confirmation
     if (elements.logoutBtn) {
         elements.logoutBtn.addEventListener('click', (e) => {
             e.preventDefault();
-            if (confirm('Are you sure you want to logout?')) {
-                window.location.href = '/logout';
+            if (window.AppUtils) {
+                window.AppUtils.showConfirmModal('Logout?', 'Are you sure you want to logout?', 'Logout')
+                    .then(confirmed => {
+                        if (confirmed) window.location.href = '/api/auth/logout';
+                    });
+            } else if (confirm('Are you sure?')) {
+                window.location.href = '/api/auth/logout';
             }
         });
     }
 
-
-
-    // Close popup with Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             closeEditPopup();

@@ -18,7 +18,7 @@ let authState = {
  */
 const checkAuthStatus = async () => {
     try {
-        const response = await fetch('/api/auth-status');
+        const response = await fetch('/api/auth/status');
         const data = await response.json();
         authState = data;
         updateNavbar();
@@ -52,7 +52,7 @@ const updateNavbar = () => {
             <li><a href="/history" class="${isActive('/history') ? 'active' : ''}">History</a></li>
             <li><a href="/profile" class="${isActive('/profile') ? 'active' : ''}">Profile</a></li>
             <li>
-                <a href="/logout" class="nav-logout">
+                <a href="/api/auth/logout" class="nav-logout">
                      Logout
                 </a>
             </li>

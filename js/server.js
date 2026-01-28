@@ -17,6 +17,8 @@ const path = require('path');
 const fs = require('fs');
 const compression = require('compression');
 const morgan = require('morgan');
+const helmet = require('helmet');
+const rateLimit = require('express-rate-limit');
 
 // Load environment variables
 require('dotenv').config({ path: path.join(__dirname, 'models', '.env') });
@@ -58,6 +60,37 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(compression());
 app.use(morgan('dev'));
+
+// Security headers
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "img-src": ["'self'", "data:", "blob:", "https:"],
+            "script-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
+            "style-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+        },
+    },
+}));
+
+// Rate limiting
+const authLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 20, // Limit each IP to 20 requests per windowMs for auth
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { error: 'Too many requests, please try again later.' }
+});
+
+const apiLimiter = rateLimit({
+    windowMs: 60 * 1000, // 1 minute
+    max: 100, // Limit each IP to 100 requests per minute
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+app.use('/api/', apiLimiter);
+app.use('/api/auth', authLimiter);
 
 // Static files with caching
 const staticCacheOpts = { maxAge: '7d', etag: true }; // cache immutable assets for 7 days
@@ -121,7 +154,7 @@ mongoose.connect(CONFIG.MONGODB_URI, mongoOptions)
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
-function isLoggedIn(req, res, next) {
+async function isLoggedIn(req, res, next) {
     const token = req.cookies.token;
 
     if (!token) {
@@ -130,6 +163,14 @@ function isLoggedIn(req, res, next) {
 
     try {
         const decoded = jwt.verify(token, CONFIG.JWT_SECRET);
+
+        // Extra security: Verify tokenVersion to support global logout
+        const user = await userModel.findById(decoded.userid);
+        if (!user || user.tokenVersion !== decoded.tokenVersion) {
+            res.clearCookie('token');
+            return res.status(401).json({ error: 'Session invalidated. Please log in again.' });
+        }
+
         req.user = decoded;
         next();
     } catch (err) {
@@ -186,7 +227,7 @@ app.get('/history', (req, res) => {
 // ============================================
 
 // Register new user
-app.post('/register', async (req, res) => {
+app.post(['/register', '/api/auth/register'], async (req, res) => {
     try {
         const { username, email, password } = req.body;
         const normalizedEmail = email ? email.toLowerCase() : '';
@@ -200,7 +241,7 @@ app.post('/register', async (req, res) => {
             return res.status(400).json({ error: 'Password must be at least 6 characters' });
         }
 
-        // Check if user exists (Only email must be unique as per request)
+        // Check if user exists
         const existingUser = await userModel.findOne({ email: normalizedEmail });
 
         if (existingUser) {
@@ -215,7 +256,8 @@ app.post('/register', async (req, res) => {
         const newUser = await userModel.create({
             username,
             email: normalizedEmail,
-            password: hashedPassword
+            password: hashedPassword,
+            tokenVersion: 0
         });
 
         // Generate JWT token
@@ -223,7 +265,8 @@ app.post('/register', async (req, res) => {
             {
                 email: newUser.email,
                 userid: newUser._id,
-                username: newUser.username
+                username: newUser.username,
+                tokenVersion: newUser.tokenVersion
             },
             CONFIG.JWT_SECRET,
             { expiresIn: CONFIG.JWT_EXPIRY }
@@ -246,7 +289,7 @@ app.post('/register', async (req, res) => {
 });
 
 // Login
-app.post('/login', async (req, res) => {
+app.post(['/login', '/api/auth/login'], async (req, res) => {
     try {
         const { email, password } = req.body;
 
@@ -271,7 +314,8 @@ app.post('/login', async (req, res) => {
             {
                 email: user.email,
                 userid: user._id,
-                username: user.username
+                username: user.username,
+                tokenVersion: user.tokenVersion || 0
             },
             CONFIG.JWT_SECRET,
             { expiresIn: CONFIG.JWT_EXPIRY }
@@ -294,8 +338,11 @@ app.post('/login', async (req, res) => {
 });
 
 // Logout
-app.get('/logout', (req, res) => {
+app.get(['/logout', '/api/auth/logout'], (req, res) => {
     res.clearCookie('token');
+    if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        return res.json({ success: true });
+    }
     res.redirect('/login');
 });
 
@@ -304,7 +351,7 @@ app.get('/logout', (req, res) => {
 // ============================================
 
 // Check if user is logged in (for dynamic navbar)
-app.get('/api/auth-status', (req, res) => {
+app.get(['/api/auth-status', '/api/auth/status'], async (req, res) => {
     const token = req.cookies.token;
 
     if (!token) {
@@ -313,6 +360,14 @@ app.get('/api/auth-status', (req, res) => {
 
     try {
         const decoded = jwt.verify(token, CONFIG.JWT_SECRET);
+
+        // Verify token version
+        const user = await userModel.findById(decoded.userid);
+        if (!user || user.tokenVersion !== decoded.tokenVersion) {
+            res.clearCookie('token');
+            return res.json({ isLoggedIn: false });
+        }
+
         res.json({
             isLoggedIn: true,
             user: {
@@ -336,7 +391,7 @@ app.get('/profile', isLoggedIn, async (req, res) => {
 });
 
 // Get user details API
-app.get('/get-user-details', isLoggedIn, async (req, res) => {
+app.get(['/get-user-details', '/api/user/profile'], isLoggedIn, async (req, res) => {
     try {
         const user = await userModel.findById(req.user.userid).select('-password').lean();
 
@@ -365,7 +420,7 @@ app.get('/get-user-details', isLoggedIn, async (req, res) => {
 
 // Update profile
 // Update profile (supports image upload)
-app.post('/update-profile', isLoggedIn, upload.single('profileImage'), async (req, res) => {
+app.post(['/update-profile', '/api/user/profile'], isLoggedIn, upload.single('profileImage'), async (req, res) => {
     try {
         const { email, age, college, bio } = req.body;
         const file = req.file;
@@ -399,8 +454,6 @@ app.post('/update-profile', isLoggedIn, upload.single('profileImage'), async (re
             const currentUser = await userModel.findById(req.user.userid);
             if (currentUser && currentUser.profileImage) {
                 const oldPath = path.join(__dirname, 'uploads', path.basename(currentUser.profileImage));
-                // Check if file exists in uploads root or subdirectories before trying to delete
-                // Simplify: just try to delete if it looks like a local path
                 if (fs.existsSync(oldPath)) {
                     try { fs.unlinkSync(oldPath); } catch (e) { }
                 }
@@ -439,7 +492,7 @@ app.post('/update-profile', isLoggedIn, upload.single('profileImage'), async (re
 // ============================================
 
 // Predict/verify signature
-app.post('/predict', isLoggedIn, upload.single('file'), async (req, res) => {
+app.post(['/predict', '/api/verify/predict'], isLoggedIn, upload.single('file'), async (req, res) => {
     try {
         let { username } = req.body;
         const file = req.file;
@@ -562,7 +615,7 @@ app.post('/predict', isLoggedIn, upload.single('file'), async (req, res) => {
 });
 
 // Get verification history
-app.get('/verification-history', isLoggedIn, async (req, res) => {
+app.get(['/verification-history', '/api/verify/history'], isLoggedIn, async (req, res) => {
     try {
         const page = Math.max(parseInt(req.query.page || '1'), 1);
         const limit = Math.min(Math.max(parseInt(req.query.limit || '20'), 1), 50);
@@ -603,7 +656,7 @@ app.get('/api/stats', async (req, res) => {
 });
 
 // Delete history item
-app.delete('/api/history/:id', isLoggedIn, async (req, res) => {
+app.delete(['/api/history/:id', '/api/verify/history/:id'], isLoggedIn, async (req, res) => {
     try {
         const record = await verificationModel.findOne({
             _id: req.params.id,

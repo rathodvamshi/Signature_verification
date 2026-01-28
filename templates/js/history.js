@@ -16,10 +16,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Setup Event Listeners for Filters
     document.getElementById('dateFilter').addEventListener('change', applyFilters);
     document.getElementById('statusFilter').addEventListener('change', applyFilters);
-
     async function fetchHistory(page = 1, limit = 20) {
         try {
-            const response = await fetch(`/verification-history?page=${page}&limit=${limit}`);
+            const response = await fetch(`/api/verify/history?page=${page}&limit=${limit}`);
             if (!response.ok) throw new Error('Failed to fetch history');
 
             const data = await response.json();
@@ -220,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         try {
-            const res = await fetch(`/api/history/${id}`, {
+            const res = await fetch(`/api/verify/history/${id}`, {
                 method: 'DELETE'
             });
 
