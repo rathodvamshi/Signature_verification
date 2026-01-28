@@ -140,19 +140,26 @@ const upload = multer({
 // DATABASE CONNECTION
 // ============================================
 if (!CONFIG.MONGODB_URI) {
-    console.error('❌ MONGODB_URI is missing. Please set it in js/models/.env for MongoDB Atlas.');
+    console.error('❌ MONGODB_URI is missing. Please set it in Render Environment Variables.');
     process.exit(1);
+} else {
+    const maskedUri = CONFIG.MONGODB_URI.replace(/:([^@]+)@/, ':****@');
+    console.log(`📡 Attempting to connect to: ${maskedUri}`);
 }
+
 const mongoOptions = {
     dbName: process.env.MONGODB_DB_NAME || 'SignatureVerification',
     maxPoolSize: parseInt(process.env.MONGODB_MAX_POOL || '20'),
     minPoolSize: parseInt(process.env.MONGODB_MIN_POOL || '5'),
-    serverSelectionTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 30000, // Increased to 30s for cloud stability
     socketTimeoutMS: 45000
 };
 mongoose.connect(CONFIG.MONGODB_URI, mongoOptions)
     .then(() => console.log(`✅ Connected to MongoDB (${mongoOptions.dbName})`))
-    .catch((err) => console.error('❌ MongoDB connection error:', err));
+    .catch((err) => {
+        console.error('❌ MongoDB connection error:', err.name, err.message);
+        console.error('💡 Hint: Check your database password and White-listing in Atlas.');
+    });
 
 // ============================================
 // AUTHENTICATION MIDDLEWARE
