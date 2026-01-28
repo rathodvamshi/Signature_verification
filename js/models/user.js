@@ -7,18 +7,15 @@ const userSchema = new mongoose.Schema({
     age: { type: Number },
     college: { type: String },
     bio: { type: String },
-    profileImage: { type: String }, // Path to profile image
-    verifications: [
-        {
-            label: { type: String, required: true }, // Forged/Real
-            confidence: { type: Number, required: true }, // Confidence score
-            fileName: { type: String }, // Optional: File name of the uploaded image
-            timestamp: { type: Date, default: Date.now } // Timestamp for the verification
-        }
-    ]
+    profileImage: { type: String } // Path to profile image
 }, {
     timestamps: true // Adds createdAt and updatedAt fields
 });
+
+// Indexes for faster lookups
+userSchema.index({ email: 1 });
+userSchema.index({ username: 1 });
+userSchema.index({ createdAt: -1 });
 
 const userModel = mongoose.model('User', userSchema);
 

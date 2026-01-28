@@ -1,0 +1,41 @@
+#########
+# Docker build context minimization
+#########
+
+.git
+.gitignore
+.gitattributes
+.vscode
+.idea
+
+# Dependencies / caches
+node_modules
+.pnpm-store
+.venv
+venv
+env
+
+# Env files
+.env
+.env.*
+*.env
+js/models/.env
+
+# Logs
+*.log
+logs/
+
+# Runtime uploads and local datasets
+uploads/
+js/uploads/
+uploads/history/
+signatures_of_candidates/
+
+# Tests/build (if present)
+dist/
+build/
+
+# Keep trained models in context (needed at runtime)
+# If using external storage or Render Disk, you may exclude:
+# js/trained_models/
+# trained_models/

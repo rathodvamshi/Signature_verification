@@ -15,6 +15,8 @@ const { spawn } = require('child_process');
 const cookieParser = require('cookie-parser');
 const path = require('path');
 const fs = require('fs');
+const compression = require('compression');
+const morgan = require('morgan');
 
 // Load environment variables
 require('dotenv').config({ path: path.join(__dirname, 'models', '.env') });
@@ -28,7 +30,7 @@ const CONFIG = {
     PORT: process.env.PORT || 3000,
     JWT_SECRET: process.env.JWT_SECRET || 'your-secure-jwt-secret-change-in-production',
     JWT_EXPIRY: '24h',
-    MONGODB_URI: process.env.MONGODB_URI || 'mongodb://localhost:27017/SignatureVerification',
+    MONGODB_URI: process.env.MONGODB_URI,
     UPLOAD_DIR: path.join(__dirname, 'uploads'),
     MODELS_DIR: path.join(__dirname, 'trained_models')
 };
@@ -54,12 +56,15 @@ const TRAINED_USERS = {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+app.use(compression());
+app.use(morgan('dev'));
 
-// Static files
-app.use(express.static(path.join(__dirname, '../templates')));
-app.use('/css', express.static(path.join(__dirname, '../templates/css')));
-app.use('/js', express.static(path.join(__dirname, '../templates/js')));
-app.use('/uploads', express.static(CONFIG.UPLOAD_DIR));
+// Static files with caching
+const staticCacheOpts = { maxAge: '7d', etag: true }; // cache immutable assets for 7 days
+app.use(express.static(path.join(__dirname, '../templates'), staticCacheOpts));
+app.use('/css', express.static(path.join(__dirname, '../templates/css'), staticCacheOpts));
+app.use('/js', express.static(path.join(__dirname, '../templates/js'), staticCacheOpts));
+app.use('/uploads', express.static(CONFIG.UPLOAD_DIR, { maxAge: '1h', etag: true }));
 
 // Ensure upload directory exists
 if (!fs.existsSync(CONFIG.UPLOAD_DIR)) {
@@ -98,8 +103,19 @@ const upload = multer({
 // ============================================
 // DATABASE CONNECTION
 // ============================================
-mongoose.connect(CONFIG.MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB'))
+if (!CONFIG.MONGODB_URI) {
+    console.error('❌ MONGODB_URI is missing. Please set it in js/models/.env for MongoDB Atlas.');
+    process.exit(1);
+}
+const mongoOptions = {
+    dbName: process.env.MONGODB_DB_NAME || 'SignatureVerification',
+    maxPoolSize: parseInt(process.env.MONGODB_MAX_POOL || '20'),
+    minPoolSize: parseInt(process.env.MONGODB_MIN_POOL || '5'),
+    serverSelectionTimeoutMS: 5000,
+    socketTimeoutMS: 45000
+};
+mongoose.connect(CONFIG.MONGODB_URI, mongoOptions)
+    .then(() => console.log(`✅ Connected to MongoDB (${mongoOptions.dbName})`))
     .catch((err) => console.error('❌ MongoDB connection error:', err));
 
 // ============================================
@@ -322,7 +338,7 @@ app.get('/profile', isLoggedIn, async (req, res) => {
 // Get user details API
 app.get('/get-user-details', isLoggedIn, async (req, res) => {
     try {
-        const user = await userModel.findById(req.user.userid).select('-password');
+        const user = await userModel.findById(req.user.userid).select('-password').lean();
 
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -364,7 +380,7 @@ app.post('/update-profile', isLoggedIn, upload.single('profileImage'), async (re
             const existingUser = await userModel.findOne({
                 email,
                 _id: { $ne: req.user.userid }
-            });
+            }).lean();
             if (existingUser) {
                 return res.status(400).json({ error: 'Email already in use' });
             }
@@ -398,7 +414,7 @@ app.post('/update-profile', isLoggedIn, upload.single('profileImage'), async (re
             req.user.userid,
             updateData,
             { new: true }
-        ).select('-password');
+        ).select('-password').lean();
 
         if (!updatedUser) {
             return res.status(404).json({ error: 'User not found' });
@@ -450,9 +466,10 @@ app.post('/predict', isLoggedIn, upload.single('file'), async (req, res) => {
             });
         }
 
-        // Run Python prediction script
+        // Use 'python3' for Linux/Render, 'python' for Windows
+        const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
         const pythonScript = path.join(__dirname, 'app.py');
-        const pythonProcess = spawn('python', [pythonScript, file.path, modelPath]);
+        const pythonProcess = spawn(pythonCommand, [pythonScript, file.path, modelPath]);
 
         let stdout = '';
         let stderr = '';
@@ -473,8 +490,10 @@ app.post('/predict', isLoggedIn, upload.single('file'), async (req, res) => {
             }
 
             try {
-                // Parse result
-                const result = stdout.trim().split(' with ');
+                // Parse result from the last line (in case of warnings)
+                const lines = stdout.trim().split('\n');
+                const lastLine = lines[lines.length - 1];
+                const result = lastLine.split(' with ');
                 const label = result[0];
                 const confidence = parseFloat(result[1].replace('%confidence', '').replace('%', ''));
 
@@ -545,12 +564,26 @@ app.post('/predict', isLoggedIn, upload.single('file'), async (req, res) => {
 // Get verification history
 app.get('/verification-history', isLoggedIn, async (req, res) => {
     try {
-        const records = await verificationModel
-            .find({ userId: req.user.userid })
-            .sort({ timestamp: -1 })
-            .limit(20);
+        const page = Math.max(parseInt(req.query.page || '1'), 1);
+        const limit = Math.min(Math.max(parseInt(req.query.limit || '20'), 1), 50);
+        const skip = (page - 1) * limit;
 
-        res.json(records);
+        const [records, total] = await Promise.all([
+            verificationModel
+                .find({ userId: req.user.userid })
+                .sort({ timestamp: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean(),
+            verificationModel.countDocuments({ userId: req.user.userid })
+        ]);
+
+        res.json({
+            page,
+            limit,
+            total,
+            records
+        });
 
     } catch (err) {
         console.error('Error fetching history:', err);

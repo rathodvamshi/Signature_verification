@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: signature-verification
+    env: docker
+    plan: free
+    region: ohio # You can change this to your preferred region
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false # Set your MongoDB Atlas URI in Render Dashboard
+      - key: JWT_SECRET
+        generateValue: true # Generates a random secret automatically
+    autoDeploy: true

@@ -1,188 +1,169 @@
-# 🖊️ Signature Verification System
+# 🖊️ AI-Powered Signature Verification System
 
-A modern, AI-powered signature verification system using deep learning for secure document authentication.
+![Signature Verification Banner](./banner.png)
 
-## ✨ Features
+[![Node.js](https://img.shields.io/badge/Node.js-v18+-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)](https://nodejs.org/)
+[![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=for-the-badge&logo=mongodb&logoColor=white)](https://www.mongodb.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
 
-- **AI-Powered Verification**: Uses trained neural network models to detect genuine vs forged signatures
-- **User Authentication**: Secure JWT-based authentication with bcrypt password hashing
-- **Modern UI/UX**: Responsive design with dark mode support
-- **Profile Management**: Users can create profiles and track verification history
-- **Drag & Drop Upload**: Easy-to-use file upload with image preview
+> A state-of-the-art, deep learning-based system designed to detect and verify handwritten signatures with high precision. Built with a robust hybrid architecture combining Node.js scalability and Python's AI capabilities.
 
-## 🏗️ Project Structure
+---
 
+## 🚀 Key Features
+
+*   **🧠 Deep Learning Engine**: Utilizes custom-trained Convolutional Neural Networks (via H5 models) for high-accuracy signature analysis.
+*   **🛡️ Multi-Factor Security**: Secure user authentication powered by JWT (JSON Web Tokens) and Bcrypt password hashing.
+*   **✨ Premium UI/UX**: Ultra-modern, responsive interface featuring glassmorphism, smooth animations, and dark mode support.
+*   **📊 Verification History**: Personal dashboard to track, view, and manage all past verification attempts with high-resolution image previews.
+*   **👤 Comprehensive Profiles**: Manage user identity, bio, and profile imagery within a secure ecosystem.
+*   **⚡ Real-Time Processing**: Instant verification results with detailed confidence scores.
+
+---
+
+## 🛠️ Tech Stack
+
+### **Frontend**
+- **Architecture**: Single Page Application (SPA) flow with Vanilla JS.
+- **Styling**: Modern CSS3 Custom Properties, Flexbox/Grid, and Keyframe Animations.
+- **Visuals**: Glassmorphism UI, Google Fonts (Inter/Outfit).
+
+### **Backend**
+- **Server**: Node.js & Express.js.
+- **Authentication**: JWT Cookies + Bcrypt.
+- **File Handling**: Multer for high-performance multipart/form-data.
+
+### **Internal AI Engine**
+- **Language**: Python 3.8+.
+- **Vision**: OpenCV (Image Preprocessing & Grayscale Conversion).
+- **Inference**: Custom NumPy implementation for efficient forward-pass prediction using pre-trained weights.
+
+### **Database & Storage**
+- **Database**: MongoDB Atlas (NoSQL).
+- **File Storage**: Local/Cloud storage for signature history.
+
+---
+
+## 📐 System Architecture
+
+```mermaid
+graph TD
+    A[Client Browser] -->|Upload Signature| B[Express.js Server]
+    B -->|Auth Check| C{JWT Valid?}
+    C -->|No| D[Login Page]
+    C -->|Yes| E[Multer Storage]
+    E -->|Temp Image| F[Python Inference Engine]
+    F -->|Load Model| G[h5 Models]
+    F -->|Processing| H[OpenCV Preprocessing]
+    H -->|Prediction| I[Result: Label + Confidence]
+    I -->|JSON Response| B
+    B -->|Store Record| J[MongoDB Atlas]
+    B -->|UI Update| A
 ```
+
+---
+
+## 🔄 The Workflow
+
+1.  **Preprocessing**: The uploaded signature is converted to grayscale and resized to a standard `150x150` resolution to ensure consistency.
+2.  **Normalization**: Pixel values are normalized between 0 and 1 to optimize the neural network's activation functions.
+3.  **Forward Pass**: The Python engine loads the specific `.h5` model for the target user. It executes a deep neural network pass using **Leaky ReLU** and **Softmax** activations.
+4.  **Classification**: The system outputs a binary classification: `Genuine` or `Forged`.
+5.  **Validation**: A confidence percentage is calculated based on the Softmax distribution, providing an added layer of certainty for the user.
+
+---
+
+## 📂 Project Structure
+
+```text
 signature_verification/
-├── js/                          # Backend
-│   ├── server.js               # Express.js server
-│   ├── app.py                  # Python ML prediction script
-│   ├── models/                 # Database models
-│   │   ├── user.js            # User schema
-│   │   ├── verification.js    # Verification records schema
-│   │   └── .env               # Environment configuration
-│   ├── trained_models/         # Pre-trained signature models (.h5)
-│   │   ├── vamshi.h5
-│   │   ├── vijay.h5
-│   │   ├── yashwant.h5
-│   │   ├── naveen.h5
-│   │   └── anirudh.h5
-│   └── uploads/                # Temporary upload directory
-│
-├── templates/                   # Frontend
-│   ├── index.html              # Home page
-│   ├── login.html              # Login page
-│   ├── signup.html             # Registration page
-│   ├── main.html               # Verification page
-│   ├── profile.html            # User profile page
-│   ├── css/                    # Stylesheets
-│   │   ├── common.css         # Shared styles & design system
-│   │   ├── home.css           # Home page styles
-│   │   ├── auth.css           # Login/Signup styles
-│   │   ├── verify.css         # Verification page styles
-│   │   └── profile.css        # Profile page styles
-│   └── js/                     # Frontend JavaScript
-│       ├── common.js          # Shared utilities
-│       └── profile.js         # Profile page logic
-│
-├── signatures_of_candidates/    # Training data
-├── package.json                # Node.js dependencies
-├── requirements.txt            # Python dependencies
-└── .gitignore                  # Git ignore rules
+├── banner.png               # Project Banner
+├── js/                      # Backend (Node.js & Python)
+│   ├── server.js            # Main Express Server
+│   ├── app.py               # ML Logic (Python)
+│   ├── models/              # Schema Definitions (Mongoose)
+│   └── trained_models/      # AI Model Repository (.h5)
+├── templates/               # Frontend (HTML/CSS/JS)
+│   ├── index.html           # Landing Page
+│   ├── main.html            # Verification Dashboard
+│   ├── profile.html         # User Profile
+│   ├── css/                 # Premium Stylesheets
+│   └── js/                  # Interactivity Logic
+├── uploads/                 # Storage for Uploaded Images
+├── signatures_of_candidates/ # Dataset Repository
+└── requirements.txt         # Python Dependencies
 ```
 
-## 🚀 Getting Started
+---
+
+## ☁️ Deployment
+
+### Deploying to Render
+
+1. **Prepare the Repository**: Ensure `Dockerfile` and `render.yaml` are in the root directory.
+2. **Connect to Render**:
+   - Create a new **Web Service** on [Render](https://render.com).
+   - Connect your GitHub repository.
+   - Render will automatically detect the `render.yaml` file.
+3. **Environment Variables**:
+   Set the following in the Render Dashboard (Environment tab):
+   - `MONGODB_URI`: Your MongoDB Atlas connection string.
+   - `JWT_SECRET`: A secure key for session signing.
+4. **Deploy**: Render will build the Docker container and deploy the app.
+
+---
+
+## 🚦 Getting Started
 
 ### Prerequisites
-
-- Node.js (v18 or higher)
-- MongoDB (running locally or remote)
-- Python 3.8+ with required packages
+- **Node.js**: v18.0.0 or higher
+- **Python**: v3.8.0 or higher
+- **MongoDB**: Access to a MongoDB Atlas cluster or local instance
 
 ### Installation
 
-1. **Clone the repository**
+1. **Clone & Enter**
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/rathodvamshi/signature_verification.git
    cd signature_verification
    ```
 
-2. **Install Node.js dependencies**
+2. **Install Environments**
    ```bash
    npm install
-   ```
-
-3. **Install Python dependencies**
-   ```bash
    pip install -r requirements.txt
    ```
 
-4. **Configure environment**
-   - Copy `js/models/.env.example` to `js/models/.env`
-   - Update the JWT_SECRET for production
-   - Update MongoDB URI if not using localhost
-
-5. **Start MongoDB**
-   ```bash
-   mongod
+3. **Configure Environment**
+   Create a `.env` file in `js/models/`:
+   ```env
+   PORT=3000
+   MONGODB_URI=your_mongodb_connection_string
+   JWT_SECRET=your_ultra_secure_secret
    ```
 
-6. **Run the server**
+4. **Launch Application**
    ```bash
    npm start
    ```
 
-7. **Open in browser**
-   ```
-   http://localhost:3000
-   ```
+---
 
-## 🔧 Configuration
+## 🔒 Security & Privacy
 
-### Environment Variables (js/models/.env)
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PORT` | Server port | 3000 |
-| `MONGODB_URI` | MongoDB connection string | mongodb://localhost:27017/SignatureVerification |
-| `JWT_SECRET` | Secret key for JWT tokens | (change in production!) |
-| `NODE_ENV` | Environment mode | development |
-
-## 📱 API Endpoints
-
-### Authentication
-- `POST /register` - Register new user
-- `POST /login` - User login
-- `GET /logout` - User logout
-
-### Profile
-- `GET /profile` - Get profile page (protected)
-- `GET /get-user-details` - Get user details API (protected)
-- `POST /update-profile` - Update profile (protected)
-
-### Verification
-- `POST /predict` - Verify signature
-- `GET /verification-history` - Get user's verification history (protected)
-
-## 🎨 Design System
-
-The project uses CSS custom properties for consistent theming:
-
-```css
-:root {
-    --primary-color: #6366f1;
-    --bg-primary: #f8fafc;
-    --text-primary: #0f172a;
-    /* ... more variables */
-}
-
-body.dark-mode {
-    --bg-primary: #0f172a;
-    --text-primary: #f1f5f9;
-    /* ... dark mode overrides */
-}
-```
-
-## 🔐 Security Features
-
-- **Password Hashing**: bcrypt with salt rounds
-- **JWT Authentication**: Secure token-based sessions
-- **HTTP-Only Cookies**: XSS protection
-- **Input Validation**: Server-side validation
-- **File Type Filtering**: Only image files accepted
-
-## 📝 Available Trained Models
-
-The system includes pre-trained models for:
-- vamshi
-- vijay
-- yashwant
-- naveen
-- anirudh
-
-## 🛠️ Development
-
-### Adding New Trained Models
-
-1. Train your model using the signature dataset
-2. Save as `.h5` file in `js/trained_models/`
-3. Add username to `TRAINED_USERS` object in `server.js`
-
-### CSS Architecture
-
-- `common.css` - Design tokens, navbar, buttons, forms, utilities
-- Page-specific CSS files for component styles
-- Mobile-first responsive design
-- Dark mode support via CSS variables
-
-## 📄 License
-
-MIT License - See LICENSE file for details
-
-## 👨‍💻 Author
-
-**Vamshi Rathod**
+This project implements industry-standard security practices:
+- **Session Security**: JWTs stored in `HttpOnly` cookies to prevent XSS attacks.
+- **Data Integrity**: Passwords are never stored in plain text; Bcrypt salts and hashes are used.
+- **Sanitization**: Strict file filtering (JPEG/PNG only) and metadata stripping during processing.
 
 ---
 
-Built with ❤️ using Express.js, MongoDB, and Deep Learning
+## 👤 Author
+
+**Vamshi Rathod**
+- Full-stack Developer & AI Enthusiast
+- [GitHub](https://github.com/rathodvamshi)
+
+---
+*Built with ❤️ for secure document authentication.*
