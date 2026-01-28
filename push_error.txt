@@ -1,0 +1,8 @@
+Uploading LFS objects: 100% (7/7), 474 MB | 0 B/s, done.
+remote: error: Trace: 68d320f09c7f12f86b5494600acb1a97808e7c3a24c0ffcca42db0f9503cadf8        
+remote: error: See https://gh.io/lfs for more information.        
+remote: error: File js/saved_model.pkl is 172.44 MB; this exceeds GitHub's file size limit of 100.00 MB        
+remote: error: GH001: Large files detected. You may want to try Git Large File Storage - https://git-lfs.github.com.        
+To https://github.com/rathodvamshi/signature_verification.git
+ ! [remote rejected] main -> main (pre-receive hook declined)
+error: failed to push some refs to 'https://github.com/rathodvamshi/signature_verification.git'

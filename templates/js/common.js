@@ -51,6 +51,9 @@ const updateNavbar = () => {
             <li><a href="/verify" class="${isActive('/verify') ? 'active' : ''}">Verify</a></li>
             <li><a href="/history" class="${isActive('/history') ? 'active' : ''}">History</a></li>
             <li><a href="/profile" class="${isActive('/profile') ? 'active' : ''}">Profile</a></li>
+            <li class="nav-secure-badge">
+                <i class="fas fa-shield-check"></i> Secure Session
+            </li>
             <li>
                 <a href="/api/auth/logout" class="nav-logout">
                      Logout
@@ -166,6 +169,35 @@ const initSmoothScroll = () => {
                     top: offsetPosition,
                     behavior: "smooth"
                 });
+            }
+        });
+    });
+};
+
+/**
+ * Handle Call to Action buttons (Try Now, Get Started, etc.)
+ */
+const initCTAButtons = () => {
+    const ctaSelectors = [
+        'a[href*="main.html"]',
+        'a[href*="/verify"]',
+        '.hero-buttons .btn-primary',
+        '.cta-section .btn'
+    ];
+
+    document.querySelectorAll(ctaSelectors.join(',')).forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            if (authState.isLoggedIn) {
+                // If logged in, ensure it goes to verify page
+                if (!btn.href.includes('/verify') && !btn.href.includes('main.html')) {
+                    e.preventDefault();
+                    window.location.href = '/verify';
+                }
+                // else let it proceed to its natural href which is already correct
+            } else {
+                // Not logged in, redirect to login
+                e.preventDefault();
+                window.location.href = '/login';
             }
         });
     });
@@ -428,6 +460,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     initSmoothScroll();
     initScrollAnimations();
     initStats();
+    initCTAButtons();
 
     document.body.addEventListener('click', async (e) => {
         const logoutLink = e.target.closest('a[href*="/logout"]');

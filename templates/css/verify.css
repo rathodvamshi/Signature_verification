@@ -1072,3 +1072,52 @@
         max-height: 100px;
     }
 }
+/* Result Suggestions */
+.result-suggestions {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    width: 100%;
+    text-align: left;
+}
+
+.result-suggestions h5 {
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: #475569;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.result-suggestions h5 i {
+    color: #f59e0b;
+}
+
+.result-suggestions ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.result-suggestions li {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.result-suggestions li i {
+    font-size: 0.7rem;
+    flex-shrink: 0;
+}
+
+.result-card.success li i { color: #10b981; }
+.result-card.danger li i { color: #ef4444; }
+

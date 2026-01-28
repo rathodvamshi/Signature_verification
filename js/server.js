@@ -179,6 +179,33 @@ async function isLoggedIn(req, res, next) {
     }
 }
 
+/**
+ * Page-level authentication middleware (Redirects to login)
+ */
+async function protectPageRoute(req, res, next) {
+    const token = req.cookies.token;
+
+    if (!token) {
+        return res.redirect('/login');
+    }
+
+    try {
+        const decoded = jwt.verify(token, CONFIG.JWT_SECRET);
+        const user = await userModel.findById(decoded.userid);
+        
+        if (!user || user.tokenVersion !== decoded.tokenVersion) {
+            res.clearCookie('token');
+            return res.redirect('/login');
+        }
+
+        req.user = decoded;
+        next();
+    } catch (err) {
+        res.clearCookie('token');
+        return res.redirect('/login');
+    }
+}
+
 // Optional auth - doesn't require login but attaches user if logged in
 function optionalAuth(req, res, next) {
     const token = req.cookies.token;
@@ -208,17 +235,17 @@ app.get(['/login', '/signup', '/auth'], (req, res) => {
 });
 
 // Verification page
-app.get('/verify', (req, res) => {
+app.get(['/verify', '/main.html'], protectPageRoute, (req, res) => {
     res.sendFile(path.join(__dirname, '../templates', 'main.html'));
 });
 
 // Profile page
-app.get('/profile', (req, res) => {
+app.get(['/profile', '/profile.html'], protectPageRoute, (req, res) => {
     res.sendFile(path.join(__dirname, '../templates', 'profile.html'));
 });
 
 // History page
-app.get('/history', (req, res) => {
+app.get(['/history', '/history.html'], protectPageRoute, (req, res) => {
     res.sendFile(path.join(__dirname, '../templates', 'history.html'));
 });
 
