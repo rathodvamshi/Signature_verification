@@ -17,15 +17,15 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('dateFilter').addEventListener('change', applyFilters);
     document.getElementById('statusFilter').addEventListener('change', applyFilters);
 
-    async function fetchHistory() {
+    async function fetchHistory(page = 1, limit = 20) {
         try {
-            const response = await fetch('/verification-history');
-            if (response.ok) {
-                allHistoryItems = await response.json();
-                applyFilters(); // Render with current filters (default: all)
-            } else {
-                throw new Error('Failed to fetch history');
-            }
+            const response = await fetch(`/verification-history?page=${page}&limit=${limit}`);
+            if (!response.ok) throw new Error('Failed to fetch history');
+
+            const data = await response.json();
+            // Support both new paginated format { records: [...] } and legacy array
+            allHistoryItems = Array.isArray(data) ? data : (data.records || []);
+            applyFilters(); // Render with current filters (default: all)
         } catch (error) {
             console.error('History Error:', error);
             historyContainer.innerHTML = `
