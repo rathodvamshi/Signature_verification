@@ -1,0 +1,38 @@
+# Dependencies
+node_modules/
+.venv/
+
+# Environment files
+.env
+*.env.local
+
+# Uploads (generated at runtime)
+js/uploads/
+uploads/
+
+# Large files (add to Git LFS or exclude)
+*.pkl
+*.mp4
+
+# Training Data (optimization)
+signatures_of_candidates/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Build
+dist/
+build/
+
+# Temp files
+*.tmp
+*.temp

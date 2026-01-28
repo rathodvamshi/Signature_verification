@@ -7,6 +7,7 @@ const userSchema = new mongoose.Schema({
     age: { type: Number },
     college: { type: String },
     bio: { type: String },
+    profileImage: { type: String }, // Path to profile image
     verifications: [
         {
             label: { type: String, required: true }, // Forged/Real
@@ -15,7 +16,7 @@ const userSchema = new mongoose.Schema({
             timestamp: { type: Date, default: Date.now } // Timestamp for the verification
         }
     ]
-},{
+}, {
     timestamps: true // Adds createdAt and updatedAt fields
 });
 

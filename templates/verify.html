@@ -54,52 +54,34 @@
          ============================================ -->
     <main class="container">
         <div class="verify-content-wrapper">
-            <!-- Header Section -->
             <div class="section-intro text-center">
-                <div class="intro-badge">
-                    <i class="fas fa-robot"></i>
-                    <span>AI-Powered</span>
-                </div>
-                <h1 class="text-gradient">Signature Verification</h1>
-                <p>Advanced AI analysis to verify signature authenticity in seconds</p>
+                <img src="js/logo.jpg" alt="AI Scanned Signature" class="ai-intro-img">
+                <h1 class="text-gradient">AI Signature Analysis</h1>
+                <p>Upload a signature to compare against our trained database</p>
             </div>
 
             <div class="verify-grid">
                 <!-- Upload Section -->
                 <div class="verify-card upload-card animate-scaleIn">
-                    <div class="card-header">
-                        <div class="card-icon">
-                            <i class="fas fa-upload"></i>
-                        </div>
-                        <div class="card-title">
-                            <h3>Upload & Verify</h3>
-                            <span>Step 1 of 2</span>
-                        </div>
-                    </div>
-
                     <form id="verifyForm">
                         <div class="form-group">
                             <label><i class="fas fa-user-circle"></i> Target Username</label>
                             <div class="input-focus-wrapper">
-                                <input type="text" id="usernameInput" placeholder="Enter username to verify against"
+                                <input type="text" id="usernameInput" placeholder="Enter username (e.g. vamshi)"
                                     required>
+                                <span class="input-line"></span>
                             </div>
                         </div>
 
-                        <div class="form-group flex-grow">
-                            <label><i class="fas fa-signature"></i> Signature Image</label>
+                        <div class="form-group">
+                            <label><i class="fas fa-image"></i> Signature Image</label>
                             <div class="drop-zone" id="dropZone">
                                 <div class="drop-zone-idle">
                                     <div class="upload-icon-wrapper">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                     </div>
-                                    <h3>Drop signature here</h3>
-                                    <p>or <span>click to browse</span></p>
-                                    <div class="supported-formats">
-                                        <span>PNG</span>
-                                        <span>JPG</span>
-                                        <span>JPEG</span>
-                                    </div>
+                                    <h3>Drop your signature here</h3>
+                                    <p>or <span>browse your files</span></p>
                                 </div>
 
                                 <div class="drop-zone-preview" id="filePreview">
@@ -119,9 +101,8 @@
                         </div>
 
                         <button type="submit" class="btn-verify" id="verifyBtn">
-                            <i class="fas fa-search"></i>
                             <span>Analyze Signature</span>
-                            <div class="btn-shine"></div>
+                            <i class="fas fa-microchip"></i>
                         </button>
                     </form>
                 </div>
@@ -129,26 +110,9 @@
                 <!-- Result Section -->
                 <div class="result-placeholder" id="resultPlaceholder">
                     <div class="placeholder-content">
-                        <div class="placeholder-icon">
-                            <i class="fas fa-shield-alt"></i>
-                            <div class="pulse-ring"></div>
-                        </div>
+                        <i class="fas fa-shield-alt"></i>
                         <h3>Ready for Analysis</h3>
-                        <p>Upload a signature and click analyze to see results</p>
-                        <div class="feature-list">
-                            <div class="feature-item">
-                                <i class="fas fa-bolt"></i>
-                                <span>Instant Results</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-brain"></i>
-                                <span>AI Powered</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-lock"></i>
-                                <span>Secure</span>
-                            </div>
-                        </div>
+                        <p>Results will appear here once the scan is complete.</p>
                     </div>
                 </div>
 
@@ -181,7 +145,7 @@
                                 <i class="fas fa-redo"></i> New Test
                             </button>
                             <a href="./history.html" class="btn-history">
-                                <i class="fas fa-history"></i> View History
+                                <i class="fas fa-history"></i> History
                             </a>
                         </div>
                     </div>

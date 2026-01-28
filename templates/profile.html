@@ -1,61 +1,173 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile</title>
-    <link rel="stylesheet" href='css/profile.css'>
+    <meta name="description" content="Manage your profile and verifications">
+    <title>SignatureVerify | Profile</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/profile.css">
 </head>
 
 <body>
+    <!-- ============================================
+         NAVIGATION BAR
+         ============================================ -->
     <nav class="navbar">
         <div class="logo">
-            <img src="https://i.pinimg.com/564x/05/8c/02/058c02ca15b75b634b40fcdbf36f5a5f.jpg" alt="Logo">
-            <h1>Signature Verification</h1>
+            <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
+                alt="SignatureVerify Logo">
+            <h1>SignatureVerify</h1>
         </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
         <ul class="nav-links">
-            <li><a href="./index.html">Back</a></li>
-            <li><a href="#template">History</a></li>
-            <li><a href="./login.html">Login</a></li>
-            <li><a href="./signup.html">Signup</a></li>
-            <li class="mode-toggle" onclick="toggleMode()">
-                <img id="moonIcon" src="https://i.pinimg.com/564x/c2/1b/06/c21b068e9cc106913f482690dcd104fa.jpg" alt="Moon Mode" class="mode-icon">
-            </li>
+            <li><a href="./index.html">Home</a></li>
+            <li><a href="./main.html">Verify</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="./profile.html" class="active">Profile</a></li>
+
         </ul>
     </nav>
-    <div class="profile-container">
-        <div class="profile-info">
-            <div class="pic">
-                <img id="profile-pic" src="https://i.pinimg.com/736x/49/49/40/494940d842c38cd9fd6de378b0caadb7.jpg" alt="Default Profile Picture" class="profile-image">
+
+    <!-- ============================================
+         PROFILE PAGE
+         ============================================ -->
+    <main class="profile-page">
+        <div class="profile-container">
+            <div class="profile-card">
+                <!-- Profile Card Content -->
+                <div class="card-content">
+                    <!-- Overlapping Avatar -->
+                    <div class="profile-avatar-wrapper">
+                        <div class="profile-avatar">
+                            <img id="profile-pic"
+                                src="https://i.pinimg.com/736x/49/49/40/494940d842c38cd9fd6de378b0caadb7.jpg"
+                                alt="Profile Picture">
+                            <div class="edit-avatar" onclick="document.getElementById('edit-profile').click()">
+                                <i class="fas fa-camera"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: User Name -->
+                    <div class="user-identity">
+                        <h1 id="username">User Name</h1>
+                    </div>
+
+                    <!-- Section 3: Status & Verifications -->
+                    <div class="profile-tags-row">
+                        <span class="tag-glass" id="account-status">
+                            <span class="dot"></span> Account Active
+                        </span>
+                        <span class="tag-glass verification-tag">
+                            <i class="fas fa-check-circle"></i>
+                            <span id="total-verifications">0</span> Verifications
+                        </span>
+                    </div>
+
+                    <!-- Section 4: Email & Age -->
+                    <div class="user-details-row">
+                        <div class="detail-item">
+                            <i class="fas fa-envelope"></i>
+                            <span id="email">email@example.com</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-birthday-cake"></i>
+                            <span id="age">Age</span>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Actions -->
+                    <div class="profile-actions-bar">
+                        <button id="edit-profile" class="btn btn-black-pill">
+                            <i class="fas fa-pen"></i>
+                            Edit Profile
+                        </button>
+                        <div class="icon-buttons">
+                            <a href="/history" class="btn-circle" title="History">
+                                <i class="fas fa-history"></i>
+                            </a>
+                            <a href="/logout" id="logout" class="btn-circle" title="Logout">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="details">
-                <h1>Welcome, <span id="username"></span></h1>
-                <p>Email: <span id="email"></span></p>
-                <p>Age: <span id="age"></span></p>
-                <p>College: <span id="college"></span></p>
-                <p>Bio: <span id="bio"></span></p>
-                <button id="edit-profile">Edit Profile</button>
-                <button id="logout" onclick="window.location.href='/logout';">Logout</button>
+        </div>
+    </main>
+
+    <!-- ============================================
+         EDIT PROFILE MODAL
+         ============================================ -->
+    <div class="modal-overlay" id="edit-popup">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>
+                    <i class="fas fa-pen"></i>
+                    Edit Profile
+                </h3>
+                <button class="close-btn" id="close-popup" aria-label="Close modal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="edit-profile-image">Profile Picture</label>
+                    <input type="file" id="edit-profile-image" accept="image/*">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-email">Email Address</label>
+                    <input type="email" id="edit-email" placeholder="Enter your email">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-age">Age</label>
+                    <input type="number" id="edit-age" placeholder="Enter your age" min="1" max="120">
+                </div>
+
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary"
+                    onclick="document.getElementById('edit-popup').classList.remove('show')">
+                    Cancel
+                </button>
+                <button class="btn btn-primary" id="update-details">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
             </div>
         </div>
     </div>
 
-    <div id="edit-popup" class="hidden">
-    <div class="popup-content">
-        <!-- Profile Edit Form -->
-        <input id="edit-email" type="email" placeholder="enter email"/>
-        <input id="edit-age" type="number" placeholder="enter age" />
-        <input id="edit-college" type="text" placeholder="enter college"/>
-        <textarea id="edit-bio" placeholder="enter bio"></textarea>
-
-        <!-- Close button -->
-        <button id="close-popup">Close</button>
-        <button id="update-details">Update Details</button>
-    </div>
-</div>
+    <!-- Common JavaScript -->
+    <script src="js/common.js"></script>
+    <script src="js/profile.js"></script>
 </body>
-<script src="./js/profile.js"></script>
+
 </html>
-
-
-

@@ -1,144 +1,211 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const editProfileBtn = document.getElementById('edit-profile');
-    const updateDetailsBtn = document.getElementById('update-details');
-    const closePopupBtn = document.getElementById('close-popup');
-    const emailField = document.getElementById('edit-email');
-    const ageField = document.getElementById('edit-age');
-    const collegeField = document.getElementById('edit-college');
-    const bioField = document.getElementById('edit-bio');
-    const editPopup = document.getElementById('edit-popup');
-    const moonIcon = document.getElementById('moonIcon');
-
-    // Prefill popup fields
-    editProfileBtn.addEventListener('click', () => {
-        emailField.value = document.getElementById('email').textContent;
-        ageField.value = document.getElementById('age').textContent;
-        collegeField.value = document.getElementById('college').textContent;
-        bioField.value = document.getElementById('bio').textContent;
-
-        editPopup.classList.add('show');
-    });
-
-    closePopupBtn.addEventListener('click', () => {
-        editPopup.classList.remove('show'); // Hide popup
-    });
-    
-
-    // Update user details
-    updateDetailsBtn.addEventListener('click', async () => {
-        const updatedDetails = {
-            email: emailField.value,
-            age: ageField.value,
-            college: collegeField.value,
-            bio: bioField.value,
-        };
-        alert("IF u have loged in then only ur Updated Details is stored in database..")
-        
-
-        try {
-            const response = await fetch('/update-profile', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatedDetails),
-            });
-
-            if (response.ok) {
-                document.getElementById('email').textContent = updatedDetails.email;
-                document.getElementById('age').textContent = updatedDetails.age;
-                document.getElementById('college').textContent = updatedDetails.college;
-                document.getElementById('bio').textContent = updatedDetails.bio;
-
-                editPopup.classList.remove('show');
-            } else {
-                alert('Failed to update details. Try again.');
-            }
-        } catch (err) {
-            alert('Error updating profile. Please try again.');
-        }
-    });
-
-    // Toggle dark mode
-    moonIcon.addEventListener('click', () => {
-        document.body.classList.toggle('dark-mode');
-    });
-});
-
+/**
+ * ============================================
+ * PROFILE PAGE JAVASCRIPT
+ * ============================================
+ */
 
 document.addEventListener('DOMContentLoaded', async () => {
-    try {
-        // Fetch user details
-        const response = await fetch('/get-user-details');
-        const user = await response.json();
+    // DOM Elements
+    const elements = {
+        profilePic: document.getElementById('profile-pic'),
+        totalVerifications: document.getElementById('total-verifications'),
+        username: document.getElementById('username'),
+        email: document.getElementById('email'),
+        age: document.getElementById('age'),
+        editBtn: document.getElementById('edit-profile'),
+        logoutBtn: document.getElementById('logout'),
+        editPopup: document.getElementById('edit-popup'),
+        closePopup: document.getElementById('close-popup'),
+        updateBtn: document.getElementById('update-details'),
+        editProfileImage: document.getElementById('edit-profile-image'),
+        editEmail: document.getElementById('edit-email'),
+        editAge: document.getElementById('edit-age')
+    };
 
-        if (response.ok) {
-            // Populate user details into the profile page
-            document.getElementById('username').textContent = user.username;
-            document.getElementById('email').textContent = user.email;
-            document.getElementById('age').textContent = user.age;
-            document.getElementById('college').textContent = user.college;
-            document.getElementById('bio').textContent = user.bio;
-        } else {
-            alert('Failed to fetch user details. Please log in again.');
+    // ============================================
+    // FETCH USER DETAILS ON PAGE LOAD
+    // ============================================
+    const fetchUserDetails = async () => {
+        try {
+            const response = await fetch('/get-user-details');
+
+            if (response.status === 401) {
+                // Not logged in, redirect to login
+                window.location.href = '/login';
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user details');
+            }
+
+            const user = await response.json();
+
+            // Populate profile fields
+            if (elements.username) elements.username.textContent = user.username || 'User';
+            if (elements.email) elements.email.textContent = user.email || 'Not provided';
+            if (elements.age) elements.age.textContent = user.age || 'Not provided';
+
+            // Update Profile Picture
+            if (elements.profilePic && user.profileImage) {
+                elements.profilePic.src = user.profileImage;
+            }
+
+            // Update Stats
+            if (elements.totalVerifications) {
+                const count = user.verificationsCount || 0;
+                elements.totalVerifications.textContent = count;
+            }
+
+        } catch (error) {
+            console.error('Error fetching user details:', error);
+            if (window.AppUtils) {
+                window.AppUtils.showToast('Failed to load profile data', 'error');
+            }
         }
-    } catch (err) {
-        console.error('Error fetching user details:', err);
-        alert('Error fetching user details. Please try again.');
-    }
+    };
 
-    // Edit profile logic remains the same
-    const editProfileBtn = document.getElementById('edit-profile');
-    const updateDetailsBtn = document.getElementById('update-details');
-    const emailField = document.getElementById('edit-email');
-    const ageField = document.getElementById('edit-age');
-    const collegeField = document.getElementById('edit-college');
-    const bioField = document.getElementById('edit-bio');
-    const editPopup = document.getElementById('edit-popup');
+    // ============================================
+    // EDIT PROFILE POPUP HANDLERS
+    // ============================================
+    const openEditPopup = () => {
+        // Pre-fill form with current values
+        if (elements.editEmail) {
+            elements.editEmail.value = elements.email?.textContent !== 'Not provided'
+                ? elements.email.textContent : '';
+        }
+        if (elements.editAge) {
+            const ageValue = elements.age?.textContent;
+            elements.editAge.value = ageValue !== 'Not provided' ? ageValue : '';
+        }
 
-    // Prefill popup fields with current values
-    editProfileBtn.addEventListener('click', () => {
-        emailField.value = document.getElementById('email').textContent;
-        ageField.value = document.getElementById('age').textContent;
-        collegeField.value = document.getElementById('college').textContent;
-        bioField.value = document.getElementById('bio').textContent;
+        // Show popup
+        if (elements.editPopup) {
+            elements.editPopup.classList.add('show');
+        }
+    };
 
-        editPopup.classList.remove('hidden');
-    });
+    const closeEditPopup = () => {
+        if (elements.editPopup) {
+            elements.editPopup.classList.remove('show');
+        }
+    };
 
-    // Update user details
-    updateDetailsBtn.addEventListener('click', async () => {
-        const updatedDetails = {
-            email: emailField.value,
-            age: ageField.value,
-            college: collegeField.value,
-            bio: bioField.value,
-        };
+    // ============================================
+    // UPDATE PROFILE
+    // ============================================
+    const updateProfile = async () => {
+        const formData = new FormData();
+
+        // Append text fields
+        if (elements.editEmail?.value) formData.append('email', elements.editEmail.value.trim());
+        if (elements.editAge?.value) formData.append('age', elements.editAge.value.trim());
+
+        // Append file
+        if (elements.editProfileImage?.files[0]) {
+            formData.append('profileImage', elements.editProfileImage.files[0]);
+        }
+
+        // Basic validation
+        if (!elements.editEmail?.value) {
+            if (window.AppUtils) {
+                window.AppUtils.showToast('Email is required', 'error');
+            }
+            return;
+        }
+
+        // Show loading state
+        if (elements.updateBtn && window.AppUtils) {
+            window.AppUtils.setLoading(elements.updateBtn, true);
+        }
 
         try {
             const response = await fetch('/update-profile', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(updatedDetails),
+                // No Content-Type header needed for FormData; browser sets it with boundary
+                body: formData
             });
 
             if (response.ok) {
-                // Update UI with the new details
-                document.getElementById('email').textContent = updatedDetails.email;
-                document.getElementById('age').textContent = updatedDetails.age;
-                document.getElementById('college').textContent = updatedDetails.college;
-                document.getElementById('bio').textContent = updatedDetails.bio;
+                const result = await response.json();
 
-                // Hide popup
-                editPopup.classList.add('hidden');
+                // Update UI with new values
+                if (elements.email) elements.email.textContent = result.email || 'Not provided';
+                if (elements.age) elements.age.textContent = result.age || 'Not provided';
+
+                // Update Image immediately if returned
+                if (result.profileImage && elements.profilePic) {
+                    // Add timestamp to force reload
+                    elements.profilePic.src = `${result.profileImage}?t=${new Date().getTime()}`;
+                }
+
+                closeEditPopup();
+
+                if (window.AppUtils) {
+                    window.AppUtils.showToast('Profile updated successfully!', 'success');
+                }
             } else {
-                alert('Failed to update details. Please try again.');
+                const error = await response.json();
+                throw new Error(error.message || error.error || 'Failed to update profile');
             }
-        } catch (err) {
-            console.error('Error updating profile:', err);
-            alert('Failed to update details. Please try again.');
+        } catch (error) {
+            console.error('Error updating profile:', error);
+            if (window.AppUtils) {
+                window.AppUtils.showToast(error.message || 'Failed to update profile', 'error');
+            }
+        } finally {
+            // Remove loading state
+            if (elements.updateBtn && window.AppUtils) {
+                window.AppUtils.setLoading(elements.updateBtn, false);
+            }
+        }
+    };
+
+    // ============================================
+    // EVENT LISTENERS
+    // ============================================
+    if (elements.editBtn) {
+        elements.editBtn.addEventListener('click', openEditPopup);
+    }
+
+    if (elements.closePopup) {
+        elements.closePopup.addEventListener('click', closeEditPopup);
+    }
+
+    if (elements.updateBtn) {
+        elements.updateBtn.addEventListener('click', updateProfile);
+    }
+
+    // Close popup when clicking outside
+    if (elements.editPopup) {
+        elements.editPopup.addEventListener('click', (e) => {
+            if (e.target === elements.editPopup) {
+                closeEditPopup();
+            }
+        });
+    }
+
+    // Logout Confirmation
+    if (elements.logoutBtn) {
+        elements.logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                window.location.href = '/logout';
+            }
+        });
+    }
+
+
+
+    // Close popup with Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeEditPopup();
         }
     });
+
+    // ============================================
+    // INITIALIZE
+    // ============================================
+    await fetchUserDetails();
 });

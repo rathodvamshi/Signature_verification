@@ -1,3 +1,12 @@
-Flask==2.2.2
-numpy==1.23.4
-opencv-python==4.5.4.60
+# Python Dependencies for Signature Verification
+# Install with: pip install -r requirements.txt
+
+# Image Processing
+opencv-python==4.8.1.78
+numpy>=1.24.0
+
+# Deep Learning Model Loading
+h5py>=3.9.0
+
+# Optional: For GPU support (uncomment if needed)
+# tensorflow>=2.13.0

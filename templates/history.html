@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="View your signature verification history">
+    <title>SignatureVerify | History</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/history.css">
+</head>
+
+<body>
+    <!-- ============================================
+         NAVIGATION BAR
+         ============================================ -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
+                alt="SignatureVerify Logo">
+            <h1>SignatureVerify</h1>
+        </div>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+
+        <ul class="nav-links">
+            <li><a href="./index.html">Home</a></li>
+            <li><a href="./main.html">Verify</a></li>
+            <li><a href="/login">Login</a></li>
+            <li><a href="./profile.html">Profile</a></li>
+
+        </ul>
+    </nav>
+
+    <!-- ============================================
+         HISTORY CONTENT
+         ============================================ -->
+    <main class="container">
+        <div class="section-header">
+            <h1 class="text-gradient">Verification History</h1>
+            <p>Recent signature verification results</p>
+        </div>
+
+        <!-- Image Preview Modal -->
+        <div id="imageModal" class="image-modal">
+            <div class="modal-card">
+                <button class="close-modal-btn">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="modal-image-wrapper">
+                    <img id="modalImage" src="" alt="Signature Preview">
+                </div>
+                <div class="modal-details">
+                    <h4 id="modalTitle">Signature Verification</h4>
+                    <p id="modalCaption"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filter-controls">
+            <div class="filter-group">
+                <label for="dateFilter"><i class="fas fa-calendar-alt"></i> Filter by Date:</label>
+                <input type="date" id="dateFilter" class="filter-input">
+            </div>
+            <div class="filter-group">
+                <label for="statusFilter"><i class="fas fa-filter"></i> Status:</label>
+                <select id="statusFilter" class="filter-input">
+                    <option value="all">All Results</option>
+                    <option value="genuine">Genuine Only</option>
+                    <option value="forged">Forged Only</option>
+                </select>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
+                <i class="fas fa-sync-alt"></i> Reset
+            </button>
+        </div>
+
+        <div id="history-container" class="history-grid">
+            <!-- Items will be injected here by JS -->
+            <div class="loading-spinner"></div>
+        </div>
+    </main>
+
+    <!-- Common JavaScript -->
+    <script src="js/common.js"></script>
+    <script src="js/history.js"></script>
+</body>
+
+</html>

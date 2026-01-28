@@ -1,0 +1,459 @@
+/* History Page Styles */
+
+/* Reuse container from common.css */
+.container {
+    padding-top: 5rem;
+    padding-bottom: var(--spacing-xl);
+}
+
+/* Section Header */
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    position: relative;
+    padding-bottom: 1.5rem;
+}
+
+.section-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: var(--primary-color);
+    /* Solid Color */
+    border-radius: var(--radius-full);
+}
+
+.section-header h1 {
+    font-size: clamp(2rem, 5vw, 2.75rem);
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}
+
+.section-header p {
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    color: var(--text-secondary);
+}
+
+/* History Grid */
+.history-grid {
+    display: grid;
+    gap: var(--spacing-lg);
+    max-width: 800px;
+    margin: 0 auto;
+    animation: fadeIn 0.5s ease;
+}
+
+/* Filter Controls - Clean Style */
+.filter-controls {
+    max-width: 800px;
+    margin: 0 auto 2rem;
+    background: var(--bg-card);
+    padding: 1rem 1.5rem;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    border: 1px solid var(--border-light);
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.filter-group label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filter-input {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.filter-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+    margin-left: auto;
+}
+
+@media (max-width: 640px) {
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1rem;
+    }
+
+    .filter-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .btn-sm {
+        margin-left: 0;
+    }
+}
+
+/* History Card */
+.history-card {
+    background-color: var(--bg-card);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+    border: 1px solid var(--border-light);
+    transition: all var(--transition-fast);
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.history-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--primary-color);
+}
+
+/* Image Container */
+.history-image-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.image-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Thumbnail */
+.history-thumb {
+    width: 100px;
+    /* Slightly larger */
+    height: 100px;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 1px solid var(--border-light);
+    cursor: pointer;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+}
+
+/* Thumbnail Image Logic */
+.history-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    /* Ensures the whole signature is visible */
+    padding: 4px;
+    background-color: #ffffff;
+    /* Signatures usually need white bg */
+    border-radius: var(--radius-sm);
+    transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.history-thumb:hover img {
+    transform: scale(1.05);
+}
+
+/* Image Modal (Lightbox) */
+.image-modal {
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    /* Slightly lighter backdrop */
+    backdrop-filter: blur(8px);
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    padding: 1rem;
+}
+
+.image-modal.show {
+    opacity: 1;
+}
+
+/* Modal Card */
+.modal-card {
+    background: var(--bg-card);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 24px;
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+    transform: scale(0.95) translateY(10px);
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.image-modal.show .modal-card {
+    transform: scale(1) translateY(0);
+}
+
+/* Modal Image Wrapper */
+.modal-image-wrapper {
+    width: 100%;
+    height: 300px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    border-bottom: 1px solid var(--border-light);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Background Pattern for Image Area */
+.modal-image-wrapper::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
+    background-size: 20px 20px;
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.modal-image-wrapper img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    z-index: 1;
+}
+
+/* Modal Details */
+.modal-details {
+    padding: 1.5rem 2rem;
+    text-align: center;
+}
+
+.modal-details h4 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-details p {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Close Button */
+.close-modal-btn {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    z-index: 10;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.close-modal-btn:hover {
+    background: white;
+    color: var(--error-color);
+    transform: rotate(90deg);
+}
+
+/* Content Area */
+.history-content {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+.history-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.history-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.history-title .highlight {
+    color: var(--primary-color);
+}
+
+.history-meta {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.history-meta i {
+    font-size: 0.8rem;
+    margin-right: 4px;
+    opacity: 0.7;
+}
+
+/* Status Section */
+.history-status {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+    min-width: 120px;
+}
+
+/* Status Badge */
+.status-badge {
+    padding: 0.35rem 0.85rem;
+    border-radius: 2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    letter-spacing: 0.3px;
+}
+
+.status-valid {
+    background-color: var(--success-bg);
+    color: var(--success-color);
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.status-invalid {
+    background-color: var(--error-bg);
+    color: var(--error-color);
+    border: 1px solid rgba(244, 63, 94, 0.2);
+}
+
+.confidence-score {
+    font-family: 'Inter', sans-serif;
+    font-weight: 500;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+/* Empty State */
+.history-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: 2px dashed var(--border-light);
+}
+
+.history-empty i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+    color: var(--primary-color);
+}
+
+/* Delete Button */
+.delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--radius-full);
+    transition: all 0.2s;
+    margin-left: 0.5rem;
+    opacity: 0.5;
+}
+
+.delete-btn:hover {
+    background: var(--error-bg);
+    color: var(--error-color);
+    opacity: 1;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .history-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1.5rem;
+    }
+
+    .history-thumb {
+        width: 100%;
+        height: 160px;
+    }
+
+    .history-content {
+        width: 100%;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .history-status {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-light);
+    }
+}
