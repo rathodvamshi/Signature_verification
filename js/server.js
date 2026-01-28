@@ -25,6 +25,9 @@ require('dotenv').config({ path: path.join(__dirname, 'models', '.env') });
 
 const app = express();
 
+// Required for proxy environments like Render
+app.set('trust proxy', 1);
+
 // ============================================
 // CONFIGURATION
 // ============================================
@@ -192,7 +195,7 @@ async function protectPageRoute(req, res, next) {
     try {
         const decoded = jwt.verify(token, CONFIG.JWT_SECRET);
         const user = await userModel.findById(decoded.userid);
-        
+
         if (!user || user.tokenVersion !== decoded.tokenVersion) {
             res.clearCookie('token');
             return res.redirect('/login');
