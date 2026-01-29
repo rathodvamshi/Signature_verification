@@ -35,6 +35,9 @@ COPY . .
 # Create necessary directories
 RUN mkdir -p js/uploads/history
 
+# DEBUG: List all files to verify structure during build
+RUN echo "📂 Listing Templates Directory:" && ls -R templates
+
 # Set permissions
 RUN chmod -R 777 js/uploads
 

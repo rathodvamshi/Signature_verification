@@ -136,7 +136,7 @@ app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js')));
 app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets')));
 app.use('/uploads', express.static(CONFIG.UPLOAD_DIR));
 
-// 4. Debug Route (View file structure)
+// 4. Debug Route (View file structure & Content)
 app.get('/debug-files', (req, res) => {
     const listDir = (dirPath) => {
         try {
@@ -147,11 +147,17 @@ app.get('/debug-files', (req, res) => {
         } catch (e) { return [`Error: ${e.message}`]; }
     };
 
+    // READ THE HTML FILE TO CHECK FOR CSS LINKS
+    let profileContent = 'File not found';
+    try {
+        profileContent = fs.readFileSync(path.join(TEMPLATES_DIR, 'profile.html'), 'utf8').substring(0, 1000);
+    } catch (e) { profileContent = e.message; }
+
     res.json({
         root: listDir(PROJECT_ROOT),
         templates: listDir(TEMPLATES_DIR),
         css: listDir(path.join(TEMPLATES_DIR, 'css')),
-        js: listDir(path.join(TEMPLATES_DIR, 'js'))
+        profile_html_snippet: profileContent // <--- THIS WILL REVEAL THE TRUTH
     });
 });
 
