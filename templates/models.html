@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Explore pre-trained AI models for signature verification.">
+    <title>Trained Models | SignatureVerify</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/common.css">
+    <link rel="stylesheet" href="css/models.css">
+</head>
+
+<body>
+    <!-- NAVIGATION BAR -->
+    <nav class="navbar">
+        <div class="logo">
+            <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
+                alt="SignatureVerify Logo">
+            <h1>SignatureVerify</h1>
+        </div>
+        <button class="menu-toggle" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+        <ul class="nav-links">
+            <!-- Injected by common.js based on auth state -->
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/models" class="active"><i class="fas fa-brain"></i> Models</a></li>
+            <li><a href="/verify"><i class="fas fa-pen-nib"></i> Verify</a></li>
+            <li><a href="/history"><i class="fas fa-clock-rotate-left"></i> History</a></li>
+            <li><a href="/profile"><i class="fas fa-user-circle"></i> Profile</a></li>
+        </ul>
+    </nav>
+
+    <main class="models-container">
+        <header class="models-header animate-on-scroll" id="models-header">
+            <div class="badge" style="margin: 0 auto 20px; display: table;">
+                <i class="fas fa-brain"></i> Neural Network Gallery
+            </div>
+            <h2>Universal Trained Models</h2>
+            <p>We've pre-trained our neural networks on these specific individuals. Select a user to explore their
+                signature variations and download sample datasets.</p>
+        </header>
+        <div class="models-grid" id="models-grid"></div>
+        <section class="signatures-section" id="signatures-section" style="display:none;"></section>
+    </main>
+
+    <!-- Image Preview Modal -->
+    <div class="image-modal" id="image-modal">
+        <div class="modal-content">
+            <button class="close-modal" id="close-modal"><i class="fas fa-times"></i></button>
+            <img id="modal-image" src="" alt="Signature Preview">
+            <div class="modal-info-text" id="modal-info-text">Signature Preview</div>
+            <div style="margin-top: 20px; text-align: center;">
+                <a id="modal-download-btn" href="#" download class="btn btn-primary" style="padding: 10px 25px;">
+                    <i class="fas fa-download"></i> Download Image
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <h2>SignatureVerify</h2>
+            <p>Advanced Forensic Analysis for the Digital Age.</p>
+            <div class="social-icons">
+                <a href="#"><i class="fab fa-github"></i></a>
+                <a href="#"><i class="fab fa-twitter"></i></a>
+                <a href="#"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/common.js?v=20260129"></script>
+    <script>
+        // Models data
+        const modelsData = [
+            {
+                id: 'vamshi',
+                name: 'Vamshi',
+                role: 'Senior Developer',
+                accuracy: '99.4%',
+                samples: '1,240',
+                suggestions: [
+                    'Try signatures with varied stroke weight.',
+                    'Test with high-pressure digital scans.'
+                ],
+                real: ['assets/trained_models/vamshi/real/real1.png', 'assets/trained_models/vamshi/real/real2.png'],
+                forged: ['assets/trained_models/vamshi/forged/forged1.png', 'assets/trained_models/vamshi/forged/forged2.png']
+            },
+            {
+                id: 'vijay',
+                name: 'Vijay',
+                role: 'Security Analyst',
+                accuracy: '98.7%',
+                samples: '958',
+                suggestions: [
+                    'Analyze signatures with significant slants.',
+                    'Check for "tremor" patterns in forged samples.'
+                ],
+                real: ['assets/trained_models/vijay/real/real1.png', 'assets/trained_models/vijay/real/real2.png'],
+                forged: ['assets/trained_models/vijay/forged/forged1.png', 'assets/trained_models/vijay/forged/forged2.png']
+            },
+            {
+                id: 'yashwant',
+                name: 'Yashwant',
+                role: 'System Architect',
+                accuracy: '99.1%',
+                samples: '1,120',
+                suggestions: [
+                    'Compare overlapping loops in cursive.',
+                    'Verify against low-resolution thermal prints.'
+                ],
+                real: ['assets/trained_models/yashwant/real/real1.png', 'assets/trained_models/yashwant/real/real2.png'],
+                forged: ['assets/trained_models/yashwant/forged/forged1.png', 'assets/trained_models/yashwant/forged/forged2.png']
+            },
+            {
+                id: 'naveen',
+                name: 'Naveen',
+                role: 'Data Scientist',
+                accuracy: '98.9%',
+                samples: '882',
+                suggestions: [
+                    'Detect hesitation marks in forged samples.',
+                    'Examine tail-extensions for authenticity.'
+                ],
+                real: ['assets/trained_models/naveen/real/real1.png', 'assets/trained_models/naveen/real/real2.png'],
+                forged: ['assets/trained_models/naveen/forged/forged1.png', 'assets/trained_models/naveen/forged/forged2.png']
+            },
+            {
+                id: 'anirudh',
+                name: 'Anirudh',
+                role: 'AI Researcher',
+                accuracy: '99.5%',
+                samples: '1,350',
+                suggestions: [
+                    'Study pressure-gradient discrepancies.',
+                    'Scan for mathematical stroke-path deviations.'
+                ],
+                real: ['assets/trained_models/anirudh/real/real1.png', 'assets/trained_models/anirudh/real/real2.png'],
+                forged: ['assets/trained_models/anirudh/forged/forged1.png', 'assets/trained_models/anirudh/forged/forged2.png']
+            }
+        ];
+
+        let currentModel = null;
+        let currentTabView = 'real';
+        let currentGridView = 'single';
+
+        function renderModelCards() {
+            const grid = document.getElementById('models-grid');
+            if (!grid) return;
+
+            grid.innerHTML = '';
+            modelsData.forEach(model => {
+                const card = document.createElement('div');
+                card.className = 'model-card animate-on-scroll';
+                card.tabIndex = 0;
+                card.innerHTML = `
+                    <div class="model-card-bg"></div>
+                    <div class="model-info">
+                        <div class="model-avatar">${model.name[0]}</div>
+                        <div class="model-details">
+                            <h3>${model.name}</h3>
+                            <span class="model-tag">${model.role}</span>
+                        </div>
+                    </div>
+                    <div class="model-stats">
+                        <div class="stat-box">
+                            <span class="label">Accuracy</span>
+                            <span class="value">${model.accuracy}</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="label">Samples</span>
+                            <span class="value">${model.samples}</span>
+                        </div>
+                    </div>
+                    <div class="model-suggestions">
+                        <h4><i class="fas fa-lightbulb"></i> Insights</h4>
+                        <ul>
+                            ${model.suggestions.map(s => `<li><i class="fas fa-search-plus"></i> ${s}</li>`).join('')}
+                        </ul>
+                    </div>
+                    <button class="btn-view-signatures">
+                        Explore dataset <i class="fas fa-arrow-right"></i>
+                    </button>
+                `;
+                card.onclick = () => showModelSignatures(model.id);
+                grid.appendChild(card);
+            });
+
+            // Re-trigger scroll animations
+            setTimeout(() => window.dispatchEvent(new Event('scroll')), 50);
+        }
+
+        function showModelSignatures(modelId) {
+            currentModel = modelId;
+            const model = modelsData.find(m => m.id === modelId);
+            if (!model) return;
+
+            const grid = document.getElementById('models-grid');
+            const header = document.getElementById('models-header');
+            const section = document.getElementById('signatures-section');
+
+            // Animation sequence
+            grid.style.opacity = '0';
+            header.style.opacity = '0';
+
+            setTimeout(() => {
+                grid.style.display = 'none';
+                header.style.display = 'none';
+
+                section.innerHTML = `
+                    <div class="signatures-section-header">
+                        <div>
+                            <h3>${model.name}'s Signature Baseline</h3>
+                            <p>Forensic dataset for model ${modelId} analysis</p>
+                        </div>
+                        <div class="header-actions">
+                            <button id="test-model-btn" class="btn btn-primary btn-pulse">
+                                <i class="fas fa-flask"></i> Verify with this Model
+                            </button>
+                            <button class="btn btn-secondary" onclick="backToModels()">
+                                <i class="fas fa-undo"></i> Back to Gallery
+                            </button>
+                        </div>
+                    </div>
+                    <div class="signatures-tabs-container">
+                        <div class="signatures-tabs">
+                            <button class="tab-btn active" data-tab="real">
+                                <i class="fas fa-check-circle"></i> Authentic Samples
+                            </button>
+                            <button class="tab-btn" data-tab="forged">
+                                <i class="fas fa-exclamation-circle"></i> Forgery Attempts
+                            </button>
+                        </div>
+                        <div class="view-options">
+                            <button class="view-opt-btn active" id="view-single" data-view="single" title="Single Grid">
+                                <i class="fas fa-th-large"></i>
+                            </button>
+                            <button class="view-opt-btn" id="view-split" data-view="split" title="Side-by-Side Comparison">
+                                <i class="fas fa-columns"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="signatures-display-area" id="signatures-display-area">
+                        <div class="signature-group real active" id="real-group">
+                            <div class="signature-grid" id="real-signatures-grid"></div>
+                        </div>
+                        <div class="signature-group forged" id="forged-group">
+                            <div class="signature-grid" id="forged-signatures-grid"></div>
+                        </div>
+                    </div>
+                `;
+
+                section.style.display = 'block';
+                setTimeout(() => section.classList.add('active'), 10);
+
+                // Initialize actions
+                initSignatureSectionListeners(model);
+                renderSignatures(model);
+
+            }, 350);
+        }
+
+        function backToModels() {
+            const grid = document.getElementById('models-grid');
+            const header = document.getElementById('models-header');
+            const section = document.getElementById('signatures-section');
+
+            section.style.opacity = '0';
+            setTimeout(() => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+                header.style.display = 'block';
+                grid.style.display = 'grid';
+                setTimeout(() => {
+                    header.style.opacity = '1';
+                    grid.style.opacity = '1';
+                    window.dispatchEvent(new Event('scroll'));
+                }, 10);
+            }, 350);
+        }
+
+        function initSignatureSectionListeners(model) {
+            const section = document.getElementById('signatures-section');
+
+            document.getElementById('test-model-btn').onclick = () => {
+                window.location.href = `/verify?user=${model.id}`;
+            };
+
+            section.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.onclick = () => {
+                    if (currentGridView === 'split') return;
+                    section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const tab = btn.dataset.tab;
+                    currentTabView = tab;
+                    section.querySelector('#real-group').classList.toggle('active', tab === 'real');
+                    section.querySelector('#forged-group').classList.toggle('active', tab === 'forged');
+                };
+            });
+
+            section.querySelectorAll('.view-opt-btn').forEach(btn => {
+                btn.onclick = () => {
+                    section.querySelectorAll('.view-opt-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const view = btn.dataset.view;
+                    currentGridView = view;
+                    const container = section.querySelector('#signatures-display-area');
+
+                    if (view === 'split') {
+                        container.classList.add('split-view');
+                        section.querySelector('#real-group').classList.add('active');
+                        section.querySelector('#forged-group').classList.add('active');
+                        section.querySelector('.signatures-tabs').style.opacity = '0.5';
+                        section.querySelector('.signatures-tabs').style.pointerEvents = 'none';
+                    } else {
+                        container.classList.remove('split-view');
+                        section.querySelector('.signatures-tabs').style.opacity = '1';
+                        section.querySelector('.signatures-tabs').style.pointerEvents = 'auto';
+                        section.querySelector('#real-group').classList.toggle('active', currentTabView === 'real');
+                        section.querySelector('#forged-group').classList.toggle('active', currentTabView === 'forged');
+                    }
+                };
+            });
+        }
+
+        function renderSignatures(model) {
+            const realGrid = document.getElementById('real-signatures-grid');
+            const forgedGrid = document.getElementById('forged-signatures-grid');
+
+            model.real.forEach((path, i) => {
+                realGrid.appendChild(createSignatureItem(path, 'Authentic', i + 1));
+            });
+
+            model.forged.forEach((path, i) => {
+                forgedGrid.appendChild(createSignatureItem(path, 'Forgery', i + 1));
+            });
+        }
+
+        function createSignatureItem(path, type, index) {
+            const div = document.createElement('div');
+            div.className = 'signature-item';
+            div.innerHTML = `
+                <div class="signature-image-wrapper" onclick="openPreview('${path}', '${type} Sample ${index}')">
+                    <img src="${path}" alt="${type}">
+                    <div class="signature-type-tag ${type.toLowerCase()}">${type}</div>
+                </div>
+                <div class="signature-actions">
+                    <button class="btn-icon" onclick="openPreview('${path}', '${type} Sample ${index}')" title="Preview">
+                        <i class="fas fa-search-plus"></i>
+                    </button>
+                    <button class="btn-icon test" onclick="testSample('${currentModel}', '${path}')" title="Verify this">
+                        <i class="fas fa-flask"></i>
+                    </button>
+                    <a href="${path}" download class="btn-icon download" title="Download">
+                        <i class="fas fa-download"></i>
+                    </a>
+                </div>
+            `;
+            return div;
+        }
+
+        function testSample(user, imagePath) {
+            const fullUrl = window.location.origin + '/' + imagePath;
+            window.location.href = `/verify?user=${user}&sample=${encodeURIComponent(fullUrl)}`;
+        }
+
+        function openPreview(path, title) {
+            const modal = document.getElementById('image-modal');
+            const modalImg = document.getElementById('modal-image');
+            const modalText = document.getElementById('modal-info-text');
+            const downloadBtn = document.getElementById('modal-download-btn');
+
+            modalImg.src = path;
+            modalText.innerText = title;
+            downloadBtn.href = path;
+
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            // Add/Update Premium Modal Test Button
+            let testBtn = document.getElementById('modal-test-btn');
+            if (!testBtn) {
+                testBtn = document.createElement('button');
+                testBtn.id = 'modal-test-btn';
+                testBtn.className = 'btn-icon test btn-pulse';
+                testBtn.style.padding = '12px 24px';
+                testBtn.style.borderRadius = '14px';
+                testBtn.style.background = 'var(--premium-gradient)';
+                testBtn.style.color = 'white';
+                testBtn.style.border = 'none';
+                testBtn.style.fontWeight = '700';
+                testBtn.style.marginLeft = '12px';
+                testBtn.style.fontSize = '1rem';
+                testBtn.style.cursor = 'pointer';
+                testBtn.innerHTML = '<i class="fas fa-flask"></i> Verify Sample Now';
+                downloadBtn.parentNode.appendChild(testBtn);
+            }
+            testBtn.onclick = () => {
+                testBtn.classList.add('verifying');
+                testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                setTimeout(() => testSample(currentModel, path), 400);
+            };
+        }
+
+        function closeModal() {
+            document.getElementById('image-modal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // Global Events
+        const closeBtn = document.getElementById('close-modal');
+        if (closeBtn) closeBtn.onclick = closeModal;
+
+        const modalOverlay = document.getElementById('image-modal');
+        if (modalOverlay) {
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target.id === 'image-modal') closeModal();
+            });
+        }
+
+        window.addEventListener('scroll', () => {
+            document.querySelectorAll('.animate-on-scroll').forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight - 50) el.classList.add('in-view');
+            });
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderModelCards();
+            const urlParams = new URLSearchParams(window.location.search);
+            const user = urlParams.get('user');
+            if (user && modelsData.find(m => m.id === user)) {
+                setTimeout(() => showModelSignatures(user), 300);
+            }
+            // Trigger initial scroll check
+            setTimeout(() => window.dispatchEvent(new Event('scroll')), 100);
+        });
+    </script>
+</body>
+
+</html>

@@ -8,25 +8,55 @@
 // ============================================
 // AUTH STATE MANAGEMENT
 // ============================================
+// ============================================
+// GLOBAL SESSION GUARD (Pro Suggestion)
+// ============================================
+const originalFetch = window.fetch;
+window.fetch = async (...args) => {
+    const response = await originalFetch(...args);
+
+    // If we get a 401 Unauthorized, and we're not on the login page or checking status
+    if (response.status === 401 &&
+        !window.location.pathname.includes('/login') &&
+        !window.location.pathname.includes('/signup') &&
+        !args[0].includes('/api/auth/status')) {
+
+        console.warn('Session expired, redirecting to login...');
+        window.location.href = '/login?session=expired&next=' + encodeURIComponent(window.location.pathname);
+    }
+
+    return response;
+};
+
 let authState = {
     isLoggedIn: false,
     user: null
 };
 
+let authCheckPromise = null;
+
 /**
  * Check authentication status from the server
  */
 const checkAuthStatus = async () => {
-    try {
-        const response = await fetch('/api/auth/status');
-        const data = await response.json();
-        authState = data;
-        updateNavbar();
-        return data;
-    } catch (error) {
-        console.error('Auth check failed:', error);
-        return { isLoggedIn: false };
-    }
+    if (authCheckPromise) return authCheckPromise;
+
+    authCheckPromise = (async () => {
+        try {
+            const response = await fetch('/api/auth/status');
+            const data = await response.json();
+            authState = data;
+            updateNavbar();
+            return data;
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            authState = { isLoggedIn: false, user: null };
+            updateNavbar();
+            return authState;
+        }
+    })();
+
+    return authCheckPromise;
 };
 
 /**
@@ -45,27 +75,28 @@ const updateNavbar = () => {
         return currentPath.includes(path.replace('.html', '').replace('/', ''));
     };
 
+    const modelsLink = `
+        <li><a href="/models" class="${isActive('/models') ? 'active' : ''}"><i class="fas fa-brain"></i> Models</a></li>
+    `;
+
     if (authState.isLoggedIn) {
+        const username = authState.user?.username || 'User';
         navLinks.innerHTML = `
-            <li><a href="/" class="${isActive('/') ? 'active' : ''}">Home</a></li>
-            <li><a href="/verify" class="${isActive('/verify') ? 'active' : ''}">Verify</a></li>
-            <li><a href="/history" class="${isActive('/history') ? 'active' : ''}">History</a></li>
-            <li><a href="/profile" class="${isActive('/profile') ? 'active' : ''}">Profile</a></li>
-            <li class="nav-secure-badge">
-                <i class="fas fa-shield-check"></i> Secure Session
-            </li>
+            <li><a href="/" class="${isActive('/') ? 'active' : ''}"><i class="fas fa-home"></i> Home</a></li>
+            ${modelsLink}
+            <li><a href="/verify" class="${isActive('/verify') ? 'active' : ''}"><i class="fas fa-pen-nib"></i> Verify</a></li>
+            <li><a href="/history" class="${isActive('/history') ? 'active' : ''}"><i class="fas fa-clock-rotate-left"></i> History</a></li>
+            <li><a href="/profile" class="${isActive('/profile') ? 'active' : ''}"><i class="fas fa-user-circle"></i> Profile</a></li>
             <li>
-                <a href="/api/auth/logout" class="nav-logout">
-                     Logout
-                </a>
+                <a href="/logout" class="nav-logout"><i class="fas fa-sign-out-alt"></i> Logout</a>
             </li>
         `;
     } else {
         navLinks.innerHTML = `
-            <li><a href="/" class="${isActive('/') ? 'active' : ''}">Home</a></li>
-            <li><a href="/#features">Features</a></li>
-            <li><a href="/login" class="${isActive('/login') ? 'active' : ''}">Login</a></li>
-            <li><a href="/signup" class="${isActive('/signup') ? 'active' : ''}">Sign Up</a></li>
+            <li><a href="/" class="${isActive('/') ? 'active' : ''}"><i class="fas fa-home"></i> Home</a></li>
+            ${modelsLink}
+            <li><a href="/login" class="${isActive('/login') ? 'active' : ''}"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="/signup" class="${isActive('/signup') ? 'active' : ''}"><i class="fas fa-user-plus"></i> Sign Up</a></li>
         `;
     }
 
@@ -95,6 +126,16 @@ const initMobileMenu = () => {
             menuToggle.classList.toggle('active');
         });
 
+        // Toggle dropdown on mobile click
+        navLinks.addEventListener('click', (e) => {
+            const dropdownToggle = e.target.closest('.nav-item-dropdown > a');
+            if (dropdownToggle && window.innerWidth <= 768) {
+                e.preventDefault();
+                const parent = dropdownToggle.parentElement;
+                parent.classList.toggle('mobile-active');
+            }
+        });
+
         document.addEventListener('click', (e) => {
             if (navLinks.classList.contains('active') &&
                 !navLinks.contains(e.target) &&
@@ -104,6 +145,42 @@ const initMobileMenu = () => {
             }
         });
     }
+
+    // Pro Tip: Make Logo Clickable globally
+    const logo = document.querySelector('.navbar .logo');
+    if (logo) {
+        logo.style.cursor = 'pointer';
+        logo.addEventListener('click', () => {
+            window.location.href = '/';
+        });
+    }
+};
+
+// ============================================
+// PAGE TRANSITION LOADER (Pro Suggestion)
+// ============================================
+const initPageLoader = () => {
+    // Add a progress bar to the top of the page
+    const progressBar = document.createElement('div');
+    progressBar.id = 'page-loader-progress';
+    progressBar.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 0;
+        height: 3px;
+        background: var(--gradient-primary);
+        z-index: 2000;
+        transition: width 0.3s ease;
+    `;
+    document.body.appendChild(progressBar);
+
+    window.addEventListener('beforeunload', () => {
+        progressBar.style.width = '60%';
+        setTimeout(() => {
+            progressBar.style.width = '100%';
+        }, 500);
+    });
 };
 
 // ============================================
@@ -178,9 +255,9 @@ const initSmoothScroll = () => {
  * Handle Call to Action buttons (Try Now, Get Started, etc.)
  */
 const initCTAButtons = () => {
+    // Only target buttons that are clearly meant to go to verification
     const ctaSelectors = [
-        'a[href*="main.html"]',
-        'a[href*="/verify"]',
+        'a.btn-verify',
         '.hero-buttons .btn-primary',
         '.cta-section .btn'
     ];
@@ -188,16 +265,18 @@ const initCTAButtons = () => {
     document.querySelectorAll(ctaSelectors.join(',')).forEach(btn => {
         btn.addEventListener('click', (e) => {
             if (authState.isLoggedIn) {
-                // If logged in, ensure it goes to verify page
-                if (!btn.href.includes('/verify') && !btn.href.includes('main.html')) {
+                // If the link is to /signup or /login, redirect specifically to /verify
+                if (btn.getAttribute('href')?.includes('signup') || btn.getAttribute('href')?.includes('login')) {
                     e.preventDefault();
                     window.location.href = '/verify';
                 }
-                // else let it proceed to its natural href which is already correct
             } else {
                 // Not logged in, redirect to login
-                e.preventDefault();
-                window.location.href = '/login';
+                const href = btn.getAttribute('href');
+                if (href && !href.startsWith('#') && !href.includes('login') && !href.includes('signup')) {
+                    e.preventDefault();
+                    window.location.href = '/login';
+                }
             }
         });
     });
@@ -235,13 +314,17 @@ const showToast = (message, type = 'info') => {
 
     const toast = document.createElement('div');
     toast.className = `toast toast-${type}`;
+    
+    const icons = {
+        success: '<i class="fas fa-check"></i>',
+        error: '<i class="fas fa-times"></i>',
+        warning: '<i class="fas fa-exclamation"></i>',
+        info: '<i class="fas fa-info"></i>'
+    };
+    
     toast.innerHTML = `
         <div class="toast-content">
-            <span class="toast-icon">
-                ${type === 'success' ? '<i class="fas fa-check"></i>' :
-            type === 'error' ? '<i class="fas fa-times"></i>' :
-                '<i class="fas fa-info"></i>'}
-            </span>
+            <span class="toast-icon">${icons[type] || icons.info}</span>
             <span class="toast-message">${message}</span>
         </div>
     `;
@@ -282,6 +365,8 @@ const showToast = (message, type = 'info') => {
             .toast-success .toast-icon { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
             .toast-error { border-color: #ef4444; }
             .toast-error .toast-icon { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+            .toast-warning { border-color: #f59e0b; }
+            .toast-warning .toast-icon { background: rgba(245, 158, 11, 0.1); color: #f59e0b; }
             .toast-info { border-color: #6366f1; }
             .toast-info .toast-icon { background: rgba(99, 102, 241, 0.1); color: #6366f1; }
             @keyframes slideInToast {
@@ -319,6 +404,59 @@ const setLoading = (button, isLoading) => {
         button.style.cursor = '';
     }
 };
+
+// ============================================
+// PASSWORD VISIBILITY TOGGLE (Global)
+// ============================================
+
+/**
+ * Toggle password visibility for an input and its eye icon
+ * @param {string} inputId - ID of the password input
+ * @param {HTMLElement} iconEl - The eye icon element clicked
+ */
+window.togglePassword = function (inputId, iconEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    const nowText = input.type === 'password';
+    input.type = nowText ? 'text' : 'password';
+
+    if (iconEl) {
+        iconEl.classList.toggle('fa-eye', !nowText);
+        iconEl.classList.toggle('fa-eye-slash', nowText);
+        iconEl.setAttribute('aria-pressed', nowText ? 'true' : 'false');
+        iconEl.setAttribute('title', nowText ? 'Hide password' : 'Show password');
+    }
+};
+
+// Delegate click/keyboard for all password toggle icons
+document.addEventListener('click', (e) => {
+    const icon = e.target.closest('.password-toggle');
+    if (!icon) return;
+
+    const targetId = icon.getAttribute('aria-controls') || icon.dataset.target;
+    if (targetId) {
+        window.togglePassword(targetId, icon);
+    } else {
+        // Fallback: find nearest input in wrapper
+        const wrapper = icon.closest('.form-input-wrapper');
+        const input = wrapper ? wrapper.querySelector('input') : null;
+        if (input && input.id) {
+            window.togglePassword(input.id, icon);
+        }
+    }
+});
+
+// Keyboard accessibility: toggle on Enter/Space
+document.addEventListener('keydown', (e) => {
+    const icon = e.target.closest('.password-toggle');
+    if (!icon) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        const targetId = icon.getAttribute('aria-controls') || icon.dataset.target;
+        if (targetId) window.togglePassword(targetId, icon);
+    }
+});
 
 /**
  * Fetch and animate global stats
@@ -455,6 +593,7 @@ const showConfirmModal = (title, message, confirmText = 'Confirm', type = 'dange
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
     await checkAuthStatus();
+    initPageLoader(); // Pro Suggestion
     initMobileMenu();
     initNavbarScroll();
     initSmoothScroll();

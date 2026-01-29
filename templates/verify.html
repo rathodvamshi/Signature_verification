@@ -45,7 +45,12 @@
         </button>
 
         <ul class="nav-links">
-            <!-- Injected by common.js -->
+            <!-- Injected by common.js based on auth state -->
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/models"><i class="fas fa-brain"></i> Models</a></li>
+            <li><a href="/verify" class="active"><i class="fas fa-pen-nib"></i> Verify</a></li>
+            <li><a href="/history"><i class="fas fa-clock-rotate-left"></i> History</a></li>
+            <li><a href="/profile"><i class="fas fa-user-circle"></i> Profile</a></li>
         </ul>
     </nav>
 
@@ -54,13 +59,14 @@
          ============================================ -->
     <main class="container">
         <div class="verify-content-wrapper">
+            <!-- Header Section -->
             <div class="section-intro text-center">
                 <div class="intro-badge">
-                    <i class="fas fa-shield-halved"></i>
-                    <span>AI-Powered Security</span>
+                    <i class="fas fa-robot"></i>
+                    <span>AI-Powered</span>
                 </div>
                 <h1 class="text-gradient">Signature Verification</h1>
-                <p>Enter a username and upload a signature to start the forensic analysis</p>
+                <p>Advanced AI analysis to verify signature authenticity in seconds</p>
             </div>
 
             <div class="verify-grid">
@@ -68,11 +74,11 @@
                 <div class="verify-card upload-card animate-scaleIn">
                     <div class="card-header">
                         <div class="card-icon">
-                            <i class="fas fa-file-signature"></i>
+                            <i class="fas fa-upload"></i>
                         </div>
                         <div class="card-title">
-                            <h3>Verification Form</h3>
-                            <span>Provide details to analyze</span>
+                            <h3>Upload & Verify</h3>
+                            <span>Step 1 of 2</span>
                         </div>
                     </div>
 
@@ -81,20 +87,24 @@
                             <label><i class="fas fa-user-circle"></i> Target Username</label>
                             <div class="input-focus-wrapper">
                                 <input type="text" id="usernameInput"
-                                    placeholder="Enter username vamshi, vijay, yash etc.." required>
-                                <span class="input-line"></span>
+                                    placeholder="e.g. vamshi, vijay, yash, naveen, anirudh" required>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label><i class="fas fa-image"></i> Signature Image</label>
+                        <div class="form-group flex-grow">
+                            <label><i class="fas fa-signature"></i> Signature Image</label>
                             <div class="drop-zone" id="dropZone">
                                 <div class="drop-zone-idle">
                                     <div class="upload-icon-wrapper">
                                         <i class="fas fa-cloud-upload-alt"></i>
                                     </div>
-                                    <h3>Drop your signature here</h3>
-                                    <p>or <span>browse your files</span></p>
+                                    <h3>Drop signature here</h3>
+                                    <p>or <span>click to browse</span></p>
+                                    <div class="supported-formats">
+                                        <span>PNG</span>
+                                        <span>JPG</span>
+                                        <span>JPEG</span>
+                                    </div>
                                 </div>
 
                                 <div class="drop-zone-preview" id="filePreview">
@@ -114,34 +124,36 @@
                         </div>
 
                         <button type="submit" class="btn-verify" id="verifyBtn">
-                            <div class="btn-shine"></div>
+                            <i class="fas fa-search"></i>
                             <span>Analyze Signature</span>
-                            <i class="fas fa-microchip"></i>
+                            <div class="btn-shine"></div>
                         </button>
-
-                        <div class="feature-list">
-                            <div class="feature-item">
-                                <i class="fas fa-bolt"></i>
-                                <span>Real-time Scan</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-brain"></i>
-                                <span>Neural Analysis</span>
-                            </div>
-                            <div class="feature-item">
-                                <i class="fas fa-lock"></i>
-                                <span>Secured</span>
-                            </div>
-                        </div>
                     </form>
                 </div>
 
                 <!-- Result Section -->
                 <div class="result-placeholder" id="resultPlaceholder">
                     <div class="placeholder-content">
-                        <i class="fas fa-shield-alt"></i>
+                        <div class="placeholder-icon">
+                            <i class="fas fa-shield-alt"></i>
+                            <div class="pulse-ring"></div>
+                        </div>
                         <h3>Ready for Analysis</h3>
-                        <p>Results will appear here once the scan is complete.</p>
+                        <p>Upload a signature and click analyze to see results</p>
+                        <div class="feature-list">
+                            <div class="feature-item">
+                                <i class="fas fa-bolt"></i>
+                                <span>Instant Results</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-brain"></i>
+                                <span>AI Powered</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-lock"></i>
+                                <span>Secure</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -169,12 +181,19 @@
                             </div>
                         </div>
 
+                        <div class="result-suggestions" id="resultSuggestions">
+                            <h5><i class="fas fa-lightbulb"></i> Forensic Suggestions:</h5>
+                            <ul id="suggestionList">
+                                <!-- Populated by JS -->
+                            </ul>
+                        </div>
+
                         <div class="result-actions">
                             <button class="btn-reset" onclick="window.location.reload()">
                                 <i class="fas fa-redo"></i> New Test
                             </button>
-                            <a href="./history.html" class="btn-history">
-                                <i class="fas fa-history"></i> History
+                            <a href="/history" class="btn-history">
+                                <i class="fas fa-history"></i> View History
                             </a>
                         </div>
                     </div>
@@ -184,7 +203,7 @@
     </main>
 
     <!-- Common JavaScript -->
-    <script src="js/common.js"></script>
+    <script src="js/common.js?v=20260129"></script>
     <script src="js/verify.js"></script>
 </body>
 

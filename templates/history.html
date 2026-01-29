@@ -42,11 +42,12 @@
         </button>
 
         <ul class="nav-links">
-            <li><a href="./index.html">Home</a></li>
-            <li><a href="./main.html">Verify</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="./profile.html">Profile</a></li>
-
+            <!-- Injected by common.js based on auth state -->
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/models"><i class="fas fa-brain"></i> Models</a></li>
+            <li><a href="/verify"><i class="fas fa-pen-nib"></i> Verify</a></li>
+            <li><a href="/history" class="active"><i class="fas fa-clock-rotate-left"></i> History</a></li>
+            <li><a href="/profile"><i class="fas fa-user-circle"></i> Profile</a></li>
         </ul>
     </nav>
 
@@ -54,55 +55,129 @@
          HISTORY CONTENT
          ============================================ -->
     <main class="container">
-        <div class="section-header">
-            <h1 class="text-gradient">Verification History</h1>
-            <p>Recent signature verification results</p>
-        </div>
-
-        <!-- Image Preview Modal -->
-        <div id="imageModal" class="image-modal">
-            <div class="modal-card">
-                <button class="close-modal-btn">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="modal-image-wrapper">
-                    <img id="modalImage" src="" alt="Signature Preview">
-                </div>
-                <div class="modal-details">
-                    <h4 id="modalTitle">Signature Verification</h4>
-                    <p id="modalCaption"></p>
-                </div>
+        <!-- Page Header -->
+        <div class="page-header animate-on-scroll">
+            <div class="header-content">
+                <h1 class="text-gradient">Verification History</h1>
+                <p>Track and manage your signature verification records</p>
             </div>
-        </div>
-
-        <!-- Filter Controls -->
-        <div class="filter-controls">
-            <div class="filter-group">
-                <label for="dateFilter"><i class="fas fa-calendar-alt"></i> Filter by Date:</label>
-                <input type="date" id="dateFilter" class="filter-input">
-            </div>
-            <div class="filter-group">
-                <label for="statusFilter"><i class="fas fa-filter"></i> Status:</label>
-                <select id="statusFilter" class="filter-input">
-                    <option value="all">All Results</option>
-                    <option value="genuine">Genuine Only</option>
-                    <option value="forged">Forged Only</option>
-                </select>
-            </div>
-            <button class="btn btn-secondary btn-sm" onclick="resetFilters()">
-                <i class="fas fa-sync-alt"></i> Reset
+            <button class="btn-refresh" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
             </button>
         </div>
 
+        <!-- Stats Dashboard -->
+        <div class="stats-dashboard animate-on-scroll">
+            <div class="stat-card">
+                <div class="stat-icon primary"><i class="fas fa-clipboard-list"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-total">0</span>
+                    <span class="stat-label">Total Verifications</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon success"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-genuine">0</span>
+                    <span class="stat-label">Genuine Detected</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon danger"><i class="fas fa-exclamation-triangle"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-forged">0</span>
+                    <span class="stat-label">Forged Detected</span>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon info"><i class="fas fa-percent"></i></div>
+                <div class="stat-info">
+                    <span class="stat-value" id="stat-success-rate">0%</span>
+                    <span class="stat-label">Success Rate</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar animate-on-scroll">
+            <!-- Search -->
+            <div class="search-wrapper">
+                <i class="fas fa-search"></i>
+                <input type="text" id="historySearch" placeholder="Search by name..." class="search-input">
+            </div>
+
+            <!-- Filters -->
+            <div class="filters-wrapper">
+                <div class="filter-group">
+                    <label><i class="fas fa-calendar-alt"></i></label>
+                    <input type="date" id="dateFilter" class="filter-input">
+                </div>
+
+                <div class="filter-group">
+                    <label><i class="fas fa-filter"></i></label>
+                    <select id="statusFilter" class="filter-input">
+                        <option value="all">All Results</option>
+                        <option value="genuine">Genuine Only</option>
+                        <option value="forged">Forged Only</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-ghost" title="Reset Filters">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
+
+            <!-- View Mode Toggle -->
+            <div class="view-toggle">
+                <button class="view-mode-btn active" data-mode="grid" title="Grid View">
+                    <i class="fas fa-th-large"></i>
+                </button>
+                <button class="view-mode-btn" data-mode="list" title="List View">
+                    <i class="fas fa-list"></i>
+                </button>
+                <button class="view-mode-btn" data-mode="timeline" title="Timeline View">
+                    <i class="fas fa-stream"></i>
+                </button>
+            </div>
+
+            <!-- Export Button -->
+            <button class="btn btn-primary btn-export" title="Export to CSV">
+                <i class="fas fa-file-export"></i>
+                <span>Export</span>
+            </button>
+        </div>
+
+        <!-- History Container -->
         <div id="history-container" class="history-grid">
-            <!-- Items will be injected here by JS -->
-            <div class="loading-spinner"></div>
+            <div class="loading-state">
+                <div class="loading-spinner"></div>
+                <p>Loading history...</p>
+            </div>
+        </div>
+
+        <!-- Load More -->
+        <div class="load-more-container" id="loadMoreContainer" style="display: none;">
+            <button id="loadMoreBtn" class="btn btn-outline">
+                <i class="fas fa-chevron-down"></i> Load More
+            </button>
         </div>
     </main>
 
-    <!-- Common JavaScript -->
-    <script src="js/common.js"></script>
-    <script src="js/history.js"></script>
+    <!-- Image Preview Modal -->
+    <div id="imageModal" class="modal-overlay">
+        <button class="close-modal-btn" aria-label="Close">&times;</button>
+        <div class="modal-content-wrapper">
+            <img id="modalImage" class="modal-image" alt="Signature Preview">
+            <div id="modalCaption" class="modal-caption"></div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/common.js?v=20260129"></script>
+    <script src="js/history.js?v=20260129"></script>
 </body>
 
 </html>

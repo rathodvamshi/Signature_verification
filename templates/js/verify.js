@@ -136,6 +136,39 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // Check for URL parameters (Direct from Models Page)
+    async function checkDeepLinks() {
+        const params = new URLSearchParams(window.location.search);
+        const user = params.get('user');
+        const sampleUrl = params.get('sample');
+
+        if (user) {
+            const usernameInput = document.getElementById('usernameInput');
+            if (usernameInput) usernameInput.value = user;
+        }
+
+        if (sampleUrl) {
+            try {
+                window.AppUtils.showToast('Loading sample signature...', 'info');
+                const response = await fetch(sampleUrl);
+                const blob = await response.blob();
+
+                // Construct file name from URL
+                const fileNameFromUrl = sampleUrl.split('/').pop();
+                const file = new File([blob], fileNameFromUrl, { type: blob.type });
+
+                // Use existing handleFiles logic
+                handleFiles([file]);
+            } catch (err) {
+                console.error('Failed to load sample:', err);
+                window.AppUtils.showToast('Failed to load sample signature', 'error');
+            }
+        }
+    }
+
+    // Call deep link check
+    checkDeepLinks();
+
     function showResult(data) {
         const card = document.getElementById('resultSection');
         const icon = document.getElementById('resultIcon');

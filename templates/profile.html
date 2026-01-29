@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Manage your profile and verifications">
-    <title>SignatureVerify | Profile</title>
+    <meta name="description" content="Manage your forensic analysis profile and verification history">
+    <title>Profile Dashboard | SignatureVerify</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
@@ -24,9 +24,7 @@
 </head>
 
 <body>
-    <!-- ============================================
-         NAVIGATION BAR
-         ============================================ -->
+    <!-- Navigation Bar -->
     <nav class="navbar">
         <div class="logo">
             <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
@@ -34,83 +32,168 @@
             <h1>SignatureVerify</h1>
         </div>
 
-        <!-- Mobile Menu Toggle -->
         <button class="menu-toggle" aria-label="Toggle navigation">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
         </button>
 
         <ul class="nav-links">
-            <li><a href="./index.html">Home</a></li>
-            <li><a href="./main.html">Verify</a></li>
-            <li><a href="/login">Login</a></li>
-            <li><a href="./profile.html" class="active">Profile</a></li>
-
+            <!-- Injected by common.js based on auth state -->
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/models"><i class="fas fa-brain"></i> Models</a></li>
+            <li><a href="/verify"><i class="fas fa-pen-nib"></i> Verify</a></li>
+            <li><a href="/history"><i class="fas fa-clock-rotate-left"></i> History</a></li>
+            <li><a href="/profile" class="active"><i class="fas fa-user-circle"></i> Profile</a></li>
         </ul>
     </nav>
 
-    <!-- ============================================
-         PROFILE PAGE
-         ============================================ -->
+    <!-- Profile Dashboard -->
     <main class="profile-page">
         <div class="profile-container">
-            <div class="profile-card">
-                <!-- Profile Card Content -->
-                <div class="card-content">
-                    <!-- Overlapping Avatar -->
-                    <div class="profile-avatar-wrapper">
-                        <div class="profile-avatar">
+            <!-- Page Header -->
+            <div class="page-header">
+                <div>
+                    <h1>Profile Dashboard</h1>
+                    <p>Manage your forensic analysis profile and preferences</p>
+                </div>
+                <div class="header-actions">
+                    <button id="edit-profile" class="btn btn-primary">
+                        <i class="fas fa-pen"></i> Edit Profile
+                    </button>
+                    <a href="/logout" id="logout" class="btn btn-secondary" title="Logout">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </div>
+            </div>
+
+            <!-- Dashboard Grid -->
+            <div class="dashboard-grid">
+                <!-- Left Column - Profile Card -->
+                <div class="profile-main-card">
+                    <div class="profile-hero">
+                        <div class="profile-avatar-large">
                             <img id="profile-pic"
                                 src="https://i.pinimg.com/736x/49/49/40/494940d842c38cd9fd6de378b0caadb7.jpg"
                                 alt="Profile Picture">
-                            <div class="edit-avatar" onclick="document.getElementById('edit-profile').click()">
+                            <div class="edit-avatar-btn" onclick="document.getElementById('edit-profile').click()">
                                 <i class="fas fa-camera"></i>
+                            </div>
+                            <div class="status-indicator"></div>
+                        </div>
+                        <div class="profile-identity">
+                            <h2 id="username">Loading...</h2>
+                            <p id="email" class="user-email">email@example.com</p>
+                            <div class="profile-badges">
+                                <span class="badge-premium">
+                                    <i class="fas fa-crown"></i> Premium User
+                                </span>
+                                <span class="badge-verified">
+                                    <i class="fas fa-check-circle"></i> Verified
+                                </span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- Section 2: User Name -->
-                    <div class="user-identity">
-                        <h1 id="username">User Name</h1>
-                    </div>
-
-                    <!-- Section 3: Status & Verifications -->
-                    <div class="profile-tags-row">
-                        <span class="tag-glass" id="account-status">
-                            <span class="dot"></span> Account Active
-                        </span>
-                        <span class="tag-glass verification-tag">
-                            <i class="fas fa-check-circle"></i>
-                            <span id="total-verifications">0</span> Verifications
-                        </span>
-                    </div>
-
-                    <!-- Section 4: Email & Age -->
-                    <div class="user-details-row">
-                        <div class="detail-item">
-                            <i class="fas fa-envelope"></i>
-                            <span id="email">email@example.com</span>
-                        </div>
-                        <div class="detail-item">
+                    <div class="profile-details-grid">
+                        <div class="detail-card">
                             <i class="fas fa-birthday-cake"></i>
-                            <span id="age">Age</span>
+                            <div>
+                                <span class="detail-label">Age</span>
+                                <span class="detail-value" id="age">--</span>
+                            </div>
+                        </div>
+                        <div class="detail-card">
+                            <i class="fas fa-university"></i>
+                            <div>
+                                <span class="detail-label">College</span>
+                                <span class="detail-value" id="college">--</span>
+                            </div>
+                        </div>
+                        <div class="detail-card full-width">
+                            <i class="fas fa-quote-left"></i>
+                            <div>
+                                <span class="detail-label">Bio</span>
+                                <p class="detail-value" id="bio">Tell us about yourself...</p>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Section 5: Actions -->
-                    <div class="profile-actions-bar">
-                        <button id="edit-profile" class="btn btn-black-pill">
-                            <i class="fas fa-pen"></i>
-                            Edit Profile
-                        </button>
-                        <div class="icon-buttons">
-                            <a href="/history" class="btn-circle" title="History">
-                                <i class="fas fa-history"></i>
-                            </a>
-                            <a href="/logout" id="logout" class="btn-circle" title="Logout">
-                                <i class="fas fa-sign-out-alt"></i>
-                            </a>
+                    <!-- Quick Actions -->
+                    <div class="quick-actions">
+                        <a href="/verify" class="action-btn">
+                            <i class="fas fa-pen-nib"></i>
+                            <span>New Verification</span>
+                        </a>
+                        <a href="/history" class="action-btn">
+                            <i class="fas fa-history"></i>
+                            <span>View History</span>
+                        </a>
+                        <a href="/models" class="action-btn">
+                            <i class="fas fa-brain"></i>
+                            <span>Explore Models</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Right Column - Analytics & Activity -->
+                <div class="analytics-column">
+                    <!-- Stats Cards -->
+                    <div class="stats-grid">
+                        <div class="stat-card stat-primary">
+                            <div class="stat-icon">
+                                <i class="fas fa-check-double"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Total Verifications</span>
+                                <span class="stat-value" id="total-verifications">0</span>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i> 12%
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-success">
+                            <div class="stat-icon">
+                                <i class="fas fa-shield-check"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Authentic</span>
+                                <span class="stat-value" id="authentic-count">0</span>
+                            </div>
+                            <div class="stat-trend up">
+                                <i class="fas fa-arrow-up"></i> 8%
+                            </div>
+                        </div>
+
+                        <div class="stat-card stat-danger">
+                            <div class="stat-icon">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="stat-content">
+                                <span class="stat-label">Forgeries Detected</span>
+                                <span class="stat-value" id="forged-count">0</span>
+                            </div>
+                            <div class="stat-trend">
+                                <i class="fas fa-minus"></i> --
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="activity-card">
+                        <div class="card-header">
+                            <h3>
+                                <i class="fas fa-clock"></i> Recent Activity
+                            </h3>
+                            <a href="/history" class="view-all">View All <i class="fas fa-arrow-right"></i></a>
+                        </div>
+                        <div class="activity-list" id="recent-activity">
+                            <!-- Loading State -->
+                            <div class="activity-loading">
+                                <i class="fas fa-spinner fa-spin"
+                                    style="font-size: 2rem; color: #6366f1; margin-bottom: 10px;"></i>
+                                <p style="color: var(--text-muted); font-size: 0.9rem;">Loading recent activity...
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -118,9 +201,7 @@
         </div>
     </main>
 
-    <!-- ============================================
-         EDIT PROFILE MODAL
-         ============================================ -->
+    <!-- Edit Profile Modal -->
     <div class="modal-overlay" id="edit-popup">
         <div class="modal-content">
             <div class="modal-header">
@@ -135,21 +216,41 @@
 
             <div class="modal-body">
                 <div class="form-group">
-                    <label for="edit-profile-image">Profile Picture</label>
+                    <label for="edit-profile-image">
+                        <i class="fas fa-image"></i> Profile Picture
+                    </label>
                     <input type="file" id="edit-profile-image" accept="image/*">
                 </div>
 
                 <div class="form-group">
-                    <label for="edit-email">Email Address</label>
+                    <label for="edit-email">
+                        <i class="fas fa-envelope"></i> Email Address
+                    </label>
                     <input type="email" id="edit-email" placeholder="Enter your email">
                 </div>
 
-                <div class="form-group">
-                    <label for="edit-age">Age</label>
-                    <input type="number" id="edit-age" placeholder="Enter your age" min="1" max="120">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="edit-age">
+                            <i class="fas fa-birthday-cake"></i> Age
+                        </label>
+                        <input type="number" id="edit-age" placeholder="Age" min="1" max="120">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit-college">
+                            <i class="fas fa-university"></i> College
+                        </label>
+                        <input type="text" id="edit-college" placeholder="Your college">
+                    </div>
                 </div>
 
-
+                <div class="form-group">
+                    <label for="edit-bio">
+                        <i class="fas fa-quote-left"></i> Bio
+                    </label>
+                    <textarea id="edit-bio" placeholder="Tell us about yourself..." rows="4"></textarea>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -165,9 +266,62 @@
         </div>
     </div>
 
-    <!-- Common JavaScript -->
-    <script src="js/common.js"></script>
+    <!-- Scripts -->
+    <script src="js/common.js?v=20260129"></script>
     <script src="js/profile.js"></script>
+
+    <!-- Debug Helper (Remove in production) -->
+    <script>
+        // Wait for DOM to be fully loaded
+        window.addEventListener('load', () => {
+            console.log('%c📊 Profile Dashboard Debug Info', 'background: #6366f1; color: white; padding: 10px; font-weight: bold;');
+            console.log('Page loaded at:', new Date().toLocaleTimeString());
+
+            // Check if elements exist
+            setTimeout(() => {
+                const checks = {
+                    'Total Verifications Element': document.getElementById('total-verifications'),
+                    'Authentic Count Element': document.getElementById('authentic-count'),
+                    'Forged Count Element': document.getElementById('forged-count'),
+                    'Recent Activity Element': document.getElementById('recent-activity'),
+                    'Username Element': document.getElementById('username'),
+                    'Email Element': document.getElementById('email')
+                };
+
+                console.table(Object.entries(checks).map(([name, el]) => ({
+                    Element: name,
+                    Status: el ? '✅ Found' : '❌ Missing',
+                    Value: el ? (el.textContent || el.innerHTML.substring(0, 30)) : 'N/A'
+                })));
+
+                // Test API
+                console.log('%c🔌 Testing API Connection...', 'color: #10b981; font-weight: bold;');
+                fetch('/api/verify/history')
+                    .then(r => r.json())
+                    .then(data => {
+                        console.log('✅ Full API Response:', data);
+                        console.log(`📊 Records array length: ${data.records?.length || 0}`);
+                        console.log(`📊 Total from API: ${data.total || 0}`);
+                        console.log(`📊 Summary:`, data.summary);
+                        if (data.records && data.records.length > 0) {
+                            console.log('Sample record (first):', data.records[0]);
+                            console.log('Sample record (last):', data.records[data.records.length - 1]);
+                        } else {
+                            console.warn('⚠️ No records found. Go to /verify to create some!');
+                        }
+                    })
+                    .catch(err => console.error('❌ API Error:', err));
+            }, 2000);
+        });
+
+        // Global helper function
+        window.forceRefreshProfile = async () => {
+            console.log('🔄 Force refreshing profile data...');
+            window.location.reload();
+        };
+
+        console.log('%cRun forceRefreshProfile() to reload', 'color: #6366f1');
+    </script>
 </body>
 
 </html>

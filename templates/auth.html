@@ -45,11 +45,11 @@
         </button>
 
         <ul class="nav-links">
-            <li><a href="./index.html">Home</a></li>
-            <li><a href="./main.html">Verify</a></li>
-            <li><a href="/login" class="active">Login</a></li>
-            <li><a href="/signup">Sign Up</a></li>
-
+            <!-- Injected by common.js based on auth state -->
+            <li><a href="/"><i class="fas fa-home"></i> Home</a></li>
+            <li><a href="/models"><i class="fas fa-brain"></i> Models</a></li>
+            <li><a href="/login" class="active"><i class="fas fa-sign-in-alt"></i> Login</a></li>
+            <li><a href="/signup"><i class="fas fa-user-plus"></i> Sign Up</a></li>
         </ul>
     </nav>
 
@@ -91,9 +91,11 @@
                                 <input type="password" name="password" id="loginPass" placeholder="••••••••" required
                                     autocomplete="current-password" style="padding-right: 2.5rem;">
                                 <i class="fas fa-lock input-icon"></i>
-                                <i class="fas fa-eye password-toggle" onclick="togglePassword('loginPass', this)"></i>
+                                <i class="fas fa-eye password-toggle" role="button" tabindex="0"
+                                    aria-label="Show password" aria-pressed="false" title="Show password"
+                                    aria-controls="loginPass" onclick="togglePassword('loginPass', this)"></i>
                             </div>
-                            
+
                         </div>
 
                         <button type="submit" class="btn-auth">
@@ -148,7 +150,9 @@
                                     placeholder="Create a strong password" required autocomplete="new-password"
                                     style="padding-right: 2.5rem;">
                                 <i class="fas fa-lock input-icon"></i>
-                                <i class="fas fa-eye password-toggle" onclick="togglePassword('signupPass', this)"></i>
+                                <i class="fas fa-eye password-toggle" role="button" tabindex="0"
+                                    aria-label="Show password" aria-pressed="false" title="Show password"
+                                    aria-controls="signupPass" onclick="togglePassword('signupPass', this)"></i>
                             </div>
 
                             <!-- Password Strength Meter -->
@@ -194,28 +198,29 @@
         </div>
     </main>
 
-    
 
-    <!-- Common JavaScript -->
-    <script src="js/common.js"></script>
+
+    <!-- Common JavaScript with cache-busting -->
+    <script src="js/common.js?v=20260129"></script>
     <script>
+        // Fallback: define toggle if global not loaded (cache/CDN issues)
+        if (typeof window.togglePassword !== 'function') {
+            window.togglePassword = function (inputId, icon) {
+                const input = document.getElementById(inputId);
+                if (!input) return;
+                const toText = input.type === 'password';
+                input.type = toText ? 'text' : 'password';
+                if (icon) {
+                    icon.classList.toggle('fa-eye', !toText);
+                    icon.classList.toggle('fa-eye-slash', toText);
+                    icon.setAttribute('aria-pressed', toText ? 'true' : 'false');
+                    icon.setAttribute('title', toText ? 'Hide password' : 'Show password');
+                }
+            };
+        }
         // Auth Slider Logic
         const loginToggle = document.getElementById('loginToggle');
         const signupToggle = document.getElementById('signupToggle');
-
-        // Password Visibility Toggle
-        function togglePassword(inputId, icon) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        }
         const sliderBg = document.getElementById('sliderBg');
         const formsTrack = document.getElementById('formsTrack');
         const loginSection = document.getElementById('loginSection');
@@ -276,18 +281,27 @@
                 const response = await fetch(form.action, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    credentials: 'include',
+                    mode: 'same-origin'
                 });
 
                 const result = await response.json();
 
-                if (response.ok) {
+                if (response.ok && result.success) {
                     if (window.AppUtils?.showToast) {
                         window.AppUtils.showToast('Success! Redirecting...', 'success');
                     }
+                    
+                    // Get redirect URL from query string or response
+                    const urlParams = new URLSearchParams(window.location.search);
+                    const nextUrl = urlParams.get('next');
+                    const redirectTo = nextUrl || result.redirectUrl || '/profile';
+                    
+                    // Small delay to ensure cookie is set, then redirect
                     setTimeout(() => {
-                        window.location.href = result.redirectUrl || '/profile.html';
-                    }, 1000);
+                        window.location.href = redirectTo;
+                    }, 500);
                 } else {
                     throw new Error(result.error || 'Authentication failed');
                 }
@@ -306,6 +320,13 @@
             }
         };
 
+        // Preserve query string (e.g., ?next=/history) on form actions
+        const qs = window.location.search || '';
+        const loginFormEl = document.getElementById('loginForm');
+        const signupFormEl = document.getElementById('signupForm');
+        if (loginFormEl && qs) loginFormEl.action = loginFormEl.action + qs;
+        if (signupFormEl && qs) signupFormEl.action = signupFormEl.action + qs;
+
         document.getElementById('loginForm').addEventListener('submit', handleAuthSubmit);
         document.getElementById('signupForm').addEventListener('submit', handleAuthSubmit);
 
@@ -314,19 +335,7 @@
         const strengthLine = document.getElementById('strengthLine');
         const tooltipList = document.querySelector('.password-tooltip ul');
 
-        // Password Toggle
-        window.togglePassword = function (inputId, icon) {
-            const input = document.getElementById(inputId);
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        };
+        // Password toggle handler is provided globally in js/common.js
 
         if (signupPass) {
             signupPass.addEventListener('input', function () {
