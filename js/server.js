@@ -104,12 +104,32 @@ app.use('/api/auth/status', statusLimiter);
 app.use('/api/auth', authLimiter);
 app.use('/api/', apiLimiter);
 
+// Ensure correct MIME types for static files
+app.use((req, res, next) => {
+    if (req.path.endsWith('.css')) {
+        res.type('text/css');
+    } else if (req.path.endsWith('.js')) {
+        res.type('application/javascript');
+    }
+    next();
+});
+
 // Static files with caching (serve assets only, not HTML)
 const staticCacheOpts = { maxAge: '7d', etag: true }; // cache immutable assets for 7 days
-app.use('/css', express.static(path.join(__dirname, '../templates/css'), staticCacheOpts));
-app.use('/js', express.static(path.join(__dirname, '../templates/js'), staticCacheOpts));
-app.use('/assets', express.static(path.join(__dirname, '../templates/assets'), staticCacheOpts));
+
+// Use absolute paths for cross-platform compatibility (Windows/Lin ux/Render)
+const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
+console.log('📁 Templates directory:', TEMPLATES_DIR);
+
+app.use('/css', express.static(path.join(TEMPLATES_DIR, 'css'), staticCacheOpts));
+app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js'), staticCacheOpts));
+app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets'), staticCacheOpts));
 app.use('/uploads', express.static(CONFIG.UPLOAD_DIR, { maxAge: '1h', etag: true }));
+
+// Debug: Log static paths on startup
+console.log('🎨 CSS Directory:', path.join(TEMPLATES_DIR, 'css'));
+console.log('📜 JS Directory:', path.join(TEMPLATES_DIR, 'js'));
+console.log('🖼️  Assets Directory:', path.join(TEMPLATES_DIR, 'assets'));
 
 // Ensure upload directory exists
 if (!fs.existsSync(CONFIG.UPLOAD_DIR)) {
