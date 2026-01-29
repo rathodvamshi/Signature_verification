@@ -129,37 +129,12 @@ app.use('/css', (req, res, next) => {
     next();
 });
 
-// 3. Static Files Serving
+// 4. Static Files Serving
 // Use absolute paths and explicit mapping
 app.use('/css', express.static(path.join(TEMPLATES_DIR, 'css')));
 app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js')));
 app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets')));
 app.use('/uploads', express.static(CONFIG.UPLOAD_DIR));
-
-// 4. Debug Route (View file structure & Content)
-app.get('/debug-files', (req, res) => {
-    const listDir = (dirPath) => {
-        try {
-            return fs.readdirSync(dirPath).map(f => {
-                const stat = fs.statSync(path.join(dirPath, f));
-                return `${f} (${stat.isDirectory() ? 'DIR' : stat.size + 'b'})`;
-            });
-        } catch (e) { return [`Error: ${e.message}`]; }
-    };
-
-    // READ THE HTML FILE TO CHECK FOR CSS LINKS
-    let profileContent = 'File not found';
-    try {
-        profileContent = fs.readFileSync(path.join(TEMPLATES_DIR, 'profile.html'), 'utf8').substring(0, 1000);
-    } catch (e) { profileContent = e.message; }
-
-    res.json({
-        root: listDir(PROJECT_ROOT),
-        templates: listDir(TEMPLATES_DIR),
-        css: listDir(path.join(TEMPLATES_DIR, 'css')),
-        profile_html_snippet: profileContent // <--- THIS WILL REVEAL THE TRUTH
-    });
-});
 
 // Ensure upload directory exists
 if (!fs.existsSync(CONFIG.UPLOAD_DIR)) {
