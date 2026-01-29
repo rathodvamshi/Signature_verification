@@ -22,8 +22,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="/css/common.css">
+    <link rel="stylesheet" href="/css/auth.css">
 </head>
 
 <body class="auth-page">
@@ -292,12 +292,12 @@
                     if (window.AppUtils?.showToast) {
                         window.AppUtils.showToast('Success! Redirecting...', 'success');
                     }
-                    
+
                     // Get redirect URL from query string or response
                     const urlParams = new URLSearchParams(window.location.search);
                     const nextUrl = urlParams.get('next');
                     const redirectTo = nextUrl || result.redirectUrl || '/profile';
-                    
+
                     // Small delay to ensure cookie is set, then redirect
                     setTimeout(() => {
                         window.location.href = redirectTo;
