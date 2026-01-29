@@ -100,36 +100,60 @@ const statusLimiter = rateLimit({
     skipSuccessfulRequests: true // Only count failures toward limit
 });
 
-app.use('/api/auth/status', statusLimiter);
-app.use('/api/auth', authLimiter);
-app.use('/api/', apiLimiter);
+// ============================================
+// DEBUGGING & PATHS
+// ============================================
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+const TEMPLATES_DIR = path.join(PROJECT_ROOT, 'templates');
 
-// Ensure correct MIME types for static files
+console.log('📂 Project Root:', PROJECT_ROOT);
+console.log('📂 Templates Dir:', TEMPLATES_DIR);
+
+// ============================================
+// MIDDLEWARE
+// ============================================
+
+// 1. Force No-Cache for HTML pages (Fixes 304 issues)
 app.use((req, res, next) => {
-    if (req.path.endsWith('.css')) {
-        res.type('text/css');
-    } else if (req.path.endsWith('.js')) {
-        res.type('application/javascript');
+    if (req.method === 'GET' && !req.path.startsWith('/css') && !req.path.startsWith('/js') && !req.path.startsWith('/assets')) {
+        res.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+        res.set('Pragma', 'no-cache');
+        res.set('Expires', '0');
     }
     next();
 });
 
-// Static files with caching (serve assets only, not HTML)
-const staticCacheOpts = { maxAge: '7d', etag: true }; // cache immutable assets for 7 days
+// 2. Logging for CSS requests
+app.use('/css', (req, res, next) => {
+    console.log(`🎨 CSS Request: ${req.url}`);
+    next();
+});
 
-// Use absolute paths for cross-platform compatibility (Windows/Lin ux/Render)
-const TEMPLATES_DIR = path.join(__dirname, '..', 'templates');
-console.log('📁 Templates directory:', TEMPLATES_DIR);
+// 3. Static Files Serving
+// Use absolute paths and explicit mapping
+app.use('/css', express.static(path.join(TEMPLATES_DIR, 'css')));
+app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js')));
+app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets')));
+app.use('/uploads', express.static(CONFIG.UPLOAD_DIR));
 
-app.use('/css', express.static(path.join(TEMPLATES_DIR, 'css'), staticCacheOpts));
-app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js'), staticCacheOpts));
-app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets'), staticCacheOpts));
-app.use('/uploads', express.static(CONFIG.UPLOAD_DIR, { maxAge: '1h', etag: true }));
+// 4. Debug Route (View file structure)
+app.get('/debug-files', (req, res) => {
+    const listDir = (dirPath) => {
+        try {
+            return fs.readdirSync(dirPath).map(f => {
+                const stat = fs.statSync(path.join(dirPath, f));
+                return `${f} (${stat.isDirectory() ? 'DIR' : stat.size + 'b'})`;
+            });
+        } catch (e) { return [`Error: ${e.message}`]; }
+    };
 
-// Debug: Log static paths on startup
-console.log('🎨 CSS Directory:', path.join(TEMPLATES_DIR, 'css'));
-console.log('📜 JS Directory:', path.join(TEMPLATES_DIR, 'js'));
-console.log('🖼️  Assets Directory:', path.join(TEMPLATES_DIR, 'assets'));
+    res.json({
+        root: listDir(PROJECT_ROOT),
+        templates: listDir(TEMPLATES_DIR),
+        css: listDir(path.join(TEMPLATES_DIR, 'css')),
+        js: listDir(path.join(TEMPLATES_DIR, 'js'))
+    });
+});
 
 // Ensure upload directory exists
 if (!fs.existsSync(CONFIG.UPLOAD_DIR)) {
