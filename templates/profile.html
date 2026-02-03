@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Manage your forensic analysis profile and verification history">
-    <title>Profile Dashboard | SignatureVerify</title>
+    <title>Profile Dashboard | Signature Verification</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
@@ -18,9 +18,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/profile.css">
+    <!-- Stylesheets with cache-busting -->
+    <link rel="stylesheet" href="/css/common.css?v=20260203">
+    <link rel="stylesheet" href="/css/profile.css?v=20260203">
 </head>
 
 <body>
@@ -29,7 +29,7 @@
         <div class="logo">
             <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
                 alt="SignatureVerify Logo">
-            <h1>SignatureVerify</h1>
+            <h1>Signature Verification</h1>
         </div>
 
         <button class="menu-toggle" aria-label="Toggle navigation">
@@ -74,7 +74,7 @@
                             <img id="profile-pic"
                                 src="https://i.pinimg.com/736x/49/49/40/494940d842c38cd9fd6de378b0caadb7.jpg"
                                 alt="Profile Picture">
-                            <div class="edit-avatar-btn" onclick="document.getElementById('edit-profile').click()">
+                            <div class="edit-avatar-btn" id="editAvatarBtn">
                                 <i class="fas fa-camera"></i>
                             </div>
                             <div class="status-indicator"></div>
@@ -254,8 +254,7 @@
             </div>
 
             <div class="modal-footer">
-                <button class="btn btn-secondary"
-                    onclick="document.getElementById('edit-popup').classList.remove('show')">
+                <button class="btn btn-secondary" id="cancelEditBtn">
                     Cancel
                 </button>
                 <button class="btn btn-primary" id="update-details">
@@ -267,8 +266,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/common.js?v=20260129"></script>
-    <script src="/js/profile.js"></script>
+    <script src="/js/common.js?v=20260203"></script>
+    <script src="/js/profile.js?v=20260203"></script>
 
     <!-- Debug Helper (Remove in production) -->
     <script>

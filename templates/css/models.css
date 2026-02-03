@@ -497,6 +497,23 @@
     color: white;
 }
 
+/* Test button loading state */
+.btn-icon.test.loading {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    pointer-events: none;
+    border-color: transparent;
+}
+
+.btn-icon.test.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
 .signature-type-tag {
     position: absolute;
     top: 15px;

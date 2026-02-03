@@ -25,6 +25,9 @@ require('dotenv').config({ path: path.join(__dirname, 'models', '.env') });
 
 const app = express();
 
+// Track MongoDB connection state
+let isMongoConnected = false;
+
 // Required for proxy environments like Render
 app.set('trust proxy', 1);
 
@@ -63,14 +66,18 @@ app.use(cookieParser());
 app.use(compression());
 app.use(morgan('dev'));
 
-// Security headers
+// Security headers - CSP compliant (no inline event handlers)
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
             ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+            "default-src": ["'self'"],
             "img-src": ["'self'", "data:", "blob:", "https:"],
             "script-src": ["'self'", "'unsafe-inline'", "https://cdnjs.cloudflare.com", "https://cdn.jsdelivr.net"],
+            "script-src-attr": ["'none'"], // Block inline event handlers (all removed for CSP compliance)
             "style-src": ["'self'", "'unsafe-inline'", "https://cdn.jsdelivr.net", "https://fonts.googleapis.com", "https://cdnjs.cloudflare.com"],
+            "font-src": ["'self'", "https://fonts.gstatic.com", "https://cdnjs.cloudflare.com"],
+            "connect-src": ["'self'"],
         },
     },
 }));
@@ -110,6 +117,36 @@ console.log('📂 Project Root:', PROJECT_ROOT);
 console.log('📂 Templates Dir:', TEMPLATES_DIR);
 
 // ============================================
+// STATIC FILE OPTIONS (Production-optimized)
+// ============================================
+const staticOptions = {
+    etag: true,
+    lastModified: true,
+    maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0, // Cache for 1 day in production
+    setHeaders: (res, filePath) => {
+        // Set proper MIME types explicitly
+        if (filePath.endsWith('.css')) {
+            res.set('Content-Type', 'text/css; charset=utf-8');
+        } else if (filePath.endsWith('.js')) {
+            res.set('Content-Type', 'application/javascript; charset=utf-8');
+        } else if (filePath.endsWith('.png')) {
+            res.set('Content-Type', 'image/png');
+        } else if (filePath.endsWith('.jpg') || filePath.endsWith('.jpeg')) {
+            res.set('Content-Type', 'image/jpeg');
+        } else if (filePath.endsWith('.svg')) {
+            res.set('Content-Type', 'image/svg+xml');
+        } else if (filePath.endsWith('.woff2')) {
+            res.set('Content-Type', 'font/woff2');
+        } else if (filePath.endsWith('.woff')) {
+            res.set('Content-Type', 'font/woff');
+        }
+
+        // Enable CORS for static assets
+        res.set('Access-Control-Allow-Origin', '*');
+    }
+};
+
+// ============================================
 // MIDDLEWARE
 // ============================================
 
@@ -123,18 +160,35 @@ app.use((req, res, next) => {
     next();
 });
 
-// 2. Logging for CSS requests
-app.use('/css', (req, res, next) => {
-    console.log(`🎨 CSS Request: ${req.url}`);
-    next();
-});
+// 2. Logging for CSS requests (development only)
+if (process.env.NODE_ENV !== 'production') {
+    app.use('/css', (req, res, next) => {
+        console.log(`🎨 CSS Request: ${req.url}`);
+        next();
+    });
+}
 
-// 4. Static Files Serving
-// Use absolute paths and explicit mapping
-app.use('/css', express.static(path.join(TEMPLATES_DIR, 'css')));
-app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js')));
-app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets')));
-app.use('/uploads', express.static(CONFIG.UPLOAD_DIR));
+// 4. Static Files Serving with optimized options
+app.use('/css', express.static(path.join(TEMPLATES_DIR, 'css'), staticOptions));
+app.use('/js', express.static(path.join(TEMPLATES_DIR, 'js'), staticOptions));
+app.use('/assets', express.static(path.join(TEMPLATES_DIR, 'assets'), staticOptions));
+app.use('/uploads', express.static(CONFIG.UPLOAD_DIR, staticOptions));
+
+// Fallback for missing history images - return placeholder instead of 404
+app.get('/uploads/history/:filename', (req, res) => {
+    const filePath = path.join(CONFIG.UPLOAD_DIR, 'history', req.params.filename);
+    if (fs.existsSync(filePath)) {
+        res.sendFile(filePath);
+    } else {
+        // Return a placeholder SVG for missing images
+        res.set('Content-Type', 'image/svg+xml');
+        res.send(`<svg xmlns="http://www.w3.org/2000/svg" width="200" height="100" viewBox="0 0 200 100">
+            <rect fill="#f1f5f9" width="200" height="100"/>
+            <text x="100" y="45" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="12">Image</text>
+            <text x="100" y="62" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="10">Not Available</text>
+        </svg>`);
+    }
+});
 
 // Ensure upload directory exists
 if (!fs.existsSync(CONFIG.UPLOAD_DIR)) {
@@ -189,20 +243,55 @@ const mongoOptions = {
     socketTimeoutMS: 45000
 };
 mongoose.connect(CONFIG.MONGODB_URI, mongoOptions)
-    .then(() => console.log(`✅ Connected to MongoDB (${mongoOptions.dbName})`))
+    .then(() => {
+        isMongoConnected = true;
+        console.log(`✅ Connected to MongoDB (${mongoOptions.dbName})`);
+    })
     .catch((err) => {
+        isMongoConnected = false;
         console.error('❌ MongoDB connection error:', err.name, err.message);
         console.error('💡 Hint: Check your database password and White-listing in Atlas.');
+        console.log('⚠️  Server will continue running with limited functionality.');
     });
+
+// Monitor MongoDB connection state changes
+mongoose.connection.on('connected', () => {
+    isMongoConnected = true;
+    console.log('✅ MongoDB reconnected');
+});
+
+mongoose.connection.on('disconnected', () => {
+    isMongoConnected = false;
+    console.log('⚠️  MongoDB disconnected');
+});
+
+mongoose.connection.on('error', (err) => {
+    isMongoConnected = false;
+    console.error('❌ MongoDB error:', err.message);
+});
 
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
+
+// Helper to check if MongoDB is available
+function checkMongoAvailable() {
+    return isMongoConnected && mongoose.connection.readyState === 1;
+}
+
 async function isLoggedIn(req, res, next) {
     const token = req.cookies.token;
 
     if (!token) {
         return res.status(401).json({ error: 'Authentication required. Please log in.' });
+    }
+
+    // Check MongoDB availability
+    if (!checkMongoAvailable()) {
+        return res.status(503).json({
+            error: 'Database temporarily unavailable. Please try again in a moment.',
+            dbStatus: 'disconnected'
+        });
     }
 
     try {
@@ -273,10 +362,12 @@ function optionalAuth(req, res, next) {
 
 // Health check
 app.get('/health', (req, res) => {
+    const mongoState = ['DISCONNECTED', 'CONNECTED', 'CONNECTING', 'DISCONNECTING'];
     res.json({
         status: 'UP',
         timestamp: new Date().toISOString(),
-        mongodb: mongoose.connection.readyState === 1 ? 'CONNECTED' : 'DISCONNECTED'
+        mongodb: mongoState[mongoose.connection.readyState] || 'UNKNOWN',
+        mongoConnected: isMongoConnected
     });
 });
 
@@ -626,16 +717,46 @@ app.post(['/predict', '/api/verify/predict'], isLoggedIn, upload.single('file'),
         });
 
         pythonProcess.on('close', async (code) => {
-            if (code !== 0) {
-                console.error('Python script error:', stderr);
-                fs.unlink(file.path, () => { }); // Delete on error
-                return res.status(500).json({ error: 'Error processing signature' });
+            // Parse result from the last line (in case of warnings)
+            const lines = stdout.trim().split('\n');
+            const lastLine = lines[lines.length - 1];
+
+            // Check for validation errors from Python script
+            if (code !== 0 || lastLine.startsWith('INVALID_IMAGE:') || lastLine.startsWith('UNCERTAIN:') || lastLine.startsWith('ERROR:')) {
+                fs.unlink(file.path, () => { }); // Delete uploaded file
+
+                // Parse error message
+                if (lastLine.startsWith('INVALID_IMAGE:')) {
+                    const reason = lastLine.replace('INVALID_IMAGE:', '').trim();
+                    return res.status(400).json({
+                        error: 'Invalid Image',
+                        message: reason,
+                        suggestion: 'Please upload a clear signature image with minimal background. The image should contain handwritten signature strokes on a white or light background.'
+                    });
+                } else if (lastLine.startsWith('UNCERTAIN:')) {
+                    const reason = lastLine.replace('UNCERTAIN:', '').trim();
+                    return res.status(400).json({
+                        error: 'Low Confidence',
+                        message: reason,
+                        suggestion: 'The image quality may be poor, or it may not clearly match the trained signature patterns. Try uploading a clearer, higher-quality signature image.'
+                    });
+                } else if (lastLine.startsWith('ERROR:')) {
+                    const reason = lastLine.replace('ERROR:', '').trim();
+                    return res.status(500).json({
+                        error: 'Processing Error',
+                        message: reason
+                    });
+                } else {
+                    console.error('Python script error:', stderr);
+                    return res.status(500).json({
+                        error: 'Error processing signature',
+                        message: 'An unexpected error occurred during verification. Please try again with a different image.'
+                    });
+                }
             }
 
             try {
-                // Parse result from the last line (in case of warnings)
-                const lines = stdout.trim().split('\n');
-                const lastLine = lines[lines.length - 1];
+                // Parse successful result
                 const result = lastLine.split(' with ');
                 const label = result[0];
                 const confidence = parseFloat(result[1].replace('%confidence', '').replace('%', ''));
@@ -752,11 +873,24 @@ app.get(['/verification-history', '/api/verify/history'], isLoggedIn, async (req
 // Get global stats
 app.get('/api/stats', async (req, res) => {
     try {
+        // Check if MongoDB is connected before querying
+        if (!isMongoConnected || mongoose.connection.readyState !== 1) {
+            return res.json({
+                totalVerifications: 0,
+                dbStatus: 'disconnected',
+                message: 'Database temporarily unavailable'
+            });
+        }
         const totalVerifications = await verificationModel.countDocuments();
-        res.json({ totalVerifications });
+        res.json({ totalVerifications, dbStatus: 'connected' });
     } catch (err) {
         console.error('Error fetching global stats:', err);
-        res.status(500).json({ error: 'Failed to fetch global stats' });
+        // Return graceful response instead of error
+        res.json({
+            totalVerifications: 0,
+            dbStatus: 'error',
+            message: 'Stats temporarily unavailable'
+        });
     }
 });
 
@@ -787,6 +921,41 @@ app.delete(['/api/history/:id', '/api/verify/history/:id'], isLoggedIn, async (r
     } catch (err) {
         console.error('Error deleting history:', err);
         res.status(500).json({ error: 'Failed to delete record' });
+    }
+});
+
+// Clean up orphaned history records (records with missing image files)
+app.delete('/api/history/cleanup/orphaned', isLoggedIn, async (req, res) => {
+    try {
+        const userId = req.user.userid;
+        const records = await verificationModel.find({ userId }).lean();
+
+        let deletedCount = 0;
+        const orphanedIds = [];
+
+        for (const record of records) {
+            if (record.imagePath) {
+                const relativePath = record.imagePath.replace('/uploads', '');
+                const filePath = path.join(CONFIG.UPLOAD_DIR, relativePath);
+
+                if (!fs.existsSync(filePath)) {
+                    orphanedIds.push(record._id);
+                }
+            }
+        }
+
+        if (orphanedIds.length > 0) {
+            const result = await verificationModel.deleteMany({ _id: { $in: orphanedIds } });
+            deletedCount = result.deletedCount;
+        }
+
+        res.json({
+            message: `Cleaned up ${deletedCount} orphaned records`,
+            deletedCount
+        });
+    } catch (err) {
+        console.error('Error cleaning orphaned records:', err);
+        res.status(500).json({ error: 'Failed to clean orphaned records' });
     }
 });
 

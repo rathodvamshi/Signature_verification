@@ -26,8 +26,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         editEmail: document.getElementById('edit-email'),
         editAge: document.getElementById('edit-age'),
         editCollege: document.getElementById('edit-college'),
-        editBio: document.getElementById('edit-bio')
+        editBio: document.getElementById('edit-bio'),
+        editAvatarBtn: document.getElementById('editAvatarBtn'),
+        cancelEditBtn: document.getElementById('cancelEditBtn')
     };
+
+    // CSP-compliant event listeners for profile actions
+    if (elements.editAvatarBtn) {
+        elements.editAvatarBtn.addEventListener('click', () => {
+            if (elements.editBtn) elements.editBtn.click();
+        });
+    }
+    
+    if (elements.cancelEditBtn) {
+        elements.cancelEditBtn.addEventListener('click', () => {
+            if (elements.editPopup) elements.editPopup.classList.remove('show');
+        });
+    }
 
     /**
      * Fetch and display user profile details

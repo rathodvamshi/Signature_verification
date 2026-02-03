@@ -16,6 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultSection = document.getElementById('resultSection');
     const resultPlaceholder = document.getElementById('resultPlaceholder');
     const verifyBtn = document.getElementById('verifyBtn');
+    const newTestBtn = document.getElementById('newTestBtn');
+
+    // New Test button - CSP compliant
+    if (newTestBtn) {
+        newTestBtn.addEventListener('click', () => window.location.reload());
+    }
 
     // Prevent default drag behaviors
     ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
@@ -120,12 +126,29 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 showResult(result);
             } else {
-                throw new Error(result.error || 'Verification failed');
+                // Enhanced error handling - show detailed message
+                let errorMessage = result.error || 'Verification failed';
+
+                // If we have a detailed message, use it
+                if (result.message) {
+                    errorMessage = result.message;
+                }
+
+                // If we have a suggestion, append it
+                if (result.suggestion) {
+                    errorMessage += '\n\n💡 ' + result.suggestion;
+                }
+
+                throw new Error(errorMessage);
             }
 
         } catch (error) {
             console.error('Verify error:', error);
-            window.AppUtils.showToast(error.message, 'error');
+
+            // Show detailed error with multiline support
+            const errorMsg = error.message || 'Verification failed';
+            window.AppUtils.showToast(errorMsg, 'error', 8000); // Show for 8 seconds
+
             // Stop Scanning Animation
             if (previewFrame) previewFrame.classList.remove('scanning-active');
             // Re-show placeholder on error
@@ -144,24 +167,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (user) {
             const usernameInput = document.getElementById('usernameInput');
-            if (usernameInput) usernameInput.value = user;
+            if (usernameInput) {
+                usernameInput.value = user;
+                // Add visual highlight to show it's pre-filled
+                usernameInput.classList.add('prefilled');
+                setTimeout(() => usernameInput.classList.remove('prefilled'), 2000);
+            }
         }
 
         if (sampleUrl) {
             try {
-                window.AppUtils.showToast('Loading sample signature...', 'info');
+                // Show loading state in drop zone
+                const dropZone = document.getElementById('dropZone');
+                if (dropZone) {
+                    dropZone.classList.add('loading-sample');
+                }
+
+                window.AppUtils.showToast(`Loading ${user}'s signature sample...`, 'info');
                 const response = await fetch(sampleUrl);
+
+                if (!response.ok) throw new Error('Failed to fetch sample');
+
                 const blob = await response.blob();
 
                 // Construct file name from URL
-                const fileNameFromUrl = sampleUrl.split('/').pop();
-                const file = new File([blob], fileNameFromUrl, { type: blob.type });
+                const fileNameFromUrl = sampleUrl.split('/').pop() || 'sample.png';
+                const file = new File([blob], fileNameFromUrl, { type: blob.type || 'image/png' });
 
                 // Use existing handleFiles logic
                 handleFiles([file]);
+
+                // Remove loading state
+                if (dropZone) {
+                    dropZone.classList.remove('loading-sample');
+                }
+
+                window.AppUtils.showToast('Sample loaded! Click "Analyze Signature" to verify.', 'success');
+
+                // Clean up URL without refreshing page
+                const cleanUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, cleanUrl);
+
             } catch (err) {
                 console.error('Failed to load sample:', err);
-                window.AppUtils.showToast('Failed to load sample signature', 'error');
+                window.AppUtils.showToast('Failed to load sample signature. Please try manually.', 'error');
+
+                const dropZone = document.getElementById('dropZone');
+                if (dropZone) {
+                    dropZone.classList.remove('loading-sample');
+                }
             }
         }
     }

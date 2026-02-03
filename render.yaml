@@ -3,14 +3,57 @@ services:
     name: signature-verification
     env: docker
     plan: free
-    region: ohio # You can change this to your preferred region
+    region: singapore # Optimized region (change based on your location)
+    
+    # Health check configuration
+    healthCheckPath: /health
+    
+    # Auto-deploy from main branch
+    autoDeploy: true
+    
+    # Environment Variables
     envVars:
       - key: NODE_ENV
         value: production
+      
       - key: PORT
         value: 10000
+      
+      # MongoDB Atlas Connection
       - key: MONGODB_URI
-        sync: false # Set your MongoDB Atlas URI in Render Dashboard
+        sync: false # ⚠️ Set this in Render Dashboard → Environment
+      
+      # Database Configuration
+      - key: MONGODB_DB_NAME
+        value: SignatureVerification
+      
+      - key: MONGODB_MAX_POOL
+        value: 10 # Reduced for free tier
+      
+      - key: MONGODB_MIN_POOL
+        value: 2
+      
+      # JWT Secret (auto-generated)
       - key: JWT_SECRET
-        generateValue: true # Generates a random secret automatically
-    autoDeploy: true
+        generateValue: true
+      
+      # Python Configuration
+      - key: PYTHONUNBUFFERED
+        value: 1
+      
+      # Performance Optimization
+      - key: NODE_OPTIONS
+        value: --max-old-space-size=512 # Optimize memory for free tier
+    
+    # Docker build configuration
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    
+    # Scaling configuration (free tier)
+    numInstances: 1
+    
+    # Disk storage for uploads
+    disk:
+      name: signature-uploads
+      mountPath: /app/uploads
+      sizeGB: 1 # 1GB persistent storage

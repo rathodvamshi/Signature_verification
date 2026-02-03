@@ -242,12 +242,12 @@ img {
     height: 42px;
     border-radius: var(--radius-full);
     object-fit: cover;
-    transition: transform var(--transition-spring);
+    transition: transform 0.3s ease;
     box-shadow: var(--shadow-sm);
 }
 
 .navbar .logo img:hover {
-    transform: rotate(360deg) scale(1.05);
+    transform: scale(1.15);
 }
 
 .navbar .logo h1 {

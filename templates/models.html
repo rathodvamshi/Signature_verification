@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Explore pre-trained AI models for signature verification.">
-    <title>Trained Models | SignatureVerify</title>
+    <title>Trained Models | Signature Verification</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
@@ -19,8 +19,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/models.css">
+    <link rel="stylesheet" href="/css/common.css?v=20260203">
+    <link rel="stylesheet" href="/css/models.css?v=20260203">
 </head>
 
 <body>
@@ -29,7 +29,7 @@
         <div class="logo">
             <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
                 alt="SignatureVerify Logo">
-            <h1>SignatureVerify</h1>
+            <h1>Signature Verification</h1>
         </div>
         <button class="menu-toggle" aria-label="Toggle navigation">
             <span></span><span></span><span></span>
@@ -84,7 +84,7 @@
     </footer>
 
     <!-- Scripts -->
-    <script src="js/common.js?v=20260129"></script>
+    <script src="/js/common.js?v=20260203"></script>
     <script>
         // Models data
         const modelsData = [
@@ -157,7 +157,7 @@
 
         let currentModel = null;
         let currentTabView = 'real';
-        let currentGridView = 'single';
+        let currentGridView = 'split'; // Default to split view
 
         function renderModelCards() {
             const grid = document.getElementById('models-grid');
@@ -205,10 +205,16 @@
             setTimeout(() => window.dispatchEvent(new Event('scroll')), 50);
         }
 
-        function showModelSignatures(modelId) {
+        function showModelSignatures(modelId, updateUrl = true) {
             currentModel = modelId;
             const model = modelsData.find(m => m.id === modelId);
             if (!model) return;
+
+            // Update URL if requested
+            if (updateUrl) {
+                const newUrl = `/models?user=${encodeURIComponent(modelId)}`;
+                window.history.pushState({ view: 'model', modelId }, '', newUrl);
+            }
 
             const grid = document.getElementById('models-grid');
             const header = document.getElementById('models-header');
@@ -232,34 +238,33 @@
                             <button id="test-model-btn" class="btn btn-primary btn-pulse">
                                 <i class="fas fa-flask"></i> Verify with this Model
                             </button>
-                            <button class="btn btn-secondary" onclick="backToModels()">
+                            <button id="back-to-models-btn" class="btn btn-secondary">
                                 <i class="fas fa-undo"></i> Back to Gallery
                             </button>
                         </div>
                     </div>
                     <div class="signatures-tabs-container">
-                        <div class="signatures-tabs">
+                        <div class="signatures-tabs" style="display: none;">
                             <button class="tab-btn active" data-tab="real">
                                 <i class="fas fa-check-circle"></i> Authentic Samples
                             </button>
-                            <button class="tab-btn" data-tab="forged">
-                                <i class="fas fa-exclamation-circle"></i> Forgery Attempts
-                            </button>
                         </div>
-                        <div class="view-options">
-                            <button class="view-opt-btn active" id="view-single" data-view="single" title="Single Grid">
+                        <div class="view-options" style="display: none;">
+                            <button class="view-opt-btn" id="view-single" data-view="single" title="Single Grid">
                                 <i class="fas fa-th-large"></i>
                             </button>
-                            <button class="view-opt-btn" id="view-split" data-view="split" title="Side-by-Side Comparison">
+                            <button class="view-opt-btn active" id="view-split" data-view="split" title="Side-by-Side Comparison">
                                 <i class="fas fa-columns"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="signatures-display-area" id="signatures-display-area">
+                    <div class="signatures-display-area split-view" id="signatures-display-area">
                         <div class="signature-group real active" id="real-group">
+                            <h4 style="margin-bottom: 20px; color: var(--text-primary); font-size: 1.1rem;"><i class="fas fa-check-circle" style="color: #10b981;"></i> Authentic Samples</h4>
                             <div class="signature-grid" id="real-signatures-grid"></div>
                         </div>
-                        <div class="signature-group forged" id="forged-group">
+                        <div class="signature-group forged active" id="forged-group">
+                            <h4 style="margin-bottom: 20px; color: var(--text-primary); font-size: 1.1rem;"><i class="fas fa-exclamation-circle" style="color: #ef4444;"></i> Forgery Attempts</h4>
                             <div class="signature-grid" id="forged-signatures-grid"></div>
                         </div>
                     </div>
@@ -275,7 +280,12 @@
             }, 350);
         }
 
-        function backToModels() {
+        function backToModels(updateUrl = true) {
+            // Update URL to remove query parameter
+            if (updateUrl) {
+                window.history.pushState({ view: 'list' }, '', '/models');
+            }
+
             const grid = document.getElementById('models-grid');
             const header = document.getElementById('models-header');
             const section = document.getElementById('signatures-section');
@@ -297,12 +307,23 @@
         function initSignatureSectionListeners(model) {
             const section = document.getElementById('signatures-section');
 
-            document.getElementById('test-model-btn').onclick = () => {
-                window.location.href = `/verify?user=${model.id}`;
-            };
+            // Test model button - CSP compliant
+            const testModelBtn = document.getElementById('test-model-btn');
+            if (testModelBtn) {
+                testModelBtn.addEventListener('click', () => {
+                    window.location.href = `/verify?user=${model.id}`;
+                });
+            }
 
+            // Back to models button - CSP compliant
+            const backBtn = document.getElementById('back-to-models-btn');
+            if (backBtn) {
+                backBtn.addEventListener('click', backToModels);
+            }
+
+            // Tab buttons - CSP compliant
             section.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     if (currentGridView === 'split') return;
                     section.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
@@ -310,11 +331,12 @@
                     currentTabView = tab;
                     section.querySelector('#real-group').classList.toggle('active', tab === 'real');
                     section.querySelector('#forged-group').classList.toggle('active', tab === 'forged');
-                };
+                });
             });
 
+            // View option buttons - CSP compliant
             section.querySelectorAll('.view-opt-btn').forEach(btn => {
-                btn.onclick = () => {
+                btn.addEventListener('click', () => {
                     section.querySelectorAll('.view-opt-btn').forEach(b => b.classList.remove('active'));
                     btn.classList.add('active');
                     const view = btn.dataset.view;
@@ -334,7 +356,7 @@
                         section.querySelector('#real-group').classList.toggle('active', currentTabView === 'real');
                         section.querySelector('#forged-group').classList.toggle('active', currentTabView === 'forged');
                     }
-                };
+                });
             });
         }
 
@@ -355,15 +377,15 @@
             const div = document.createElement('div');
             div.className = 'signature-item';
             div.innerHTML = `
-                <div class="signature-image-wrapper" onclick="openPreview('${path}', '${type} Sample ${index}')">
+                <div class="signature-image-wrapper" data-action="preview" data-path="${path}" data-title="${type} Sample ${index}">
                     <img src="${path}" alt="${type}">
                     <div class="signature-type-tag ${type.toLowerCase()}">${type}</div>
                 </div>
                 <div class="signature-actions">
-                    <button class="btn-icon" onclick="openPreview('${path}', '${type} Sample ${index}')" title="Preview">
+                    <button class="btn-icon preview-btn" data-action="preview" data-path="${path}" data-title="${type} Sample ${index}" title="Preview">
                         <i class="fas fa-search-plus"></i>
                     </button>
-                    <button class="btn-icon test" onclick="testSample('${currentModel}', '${path}')" title="Verify this">
+                    <button class="btn-icon test" data-action="test" data-user="${currentModel}" data-path="${path}" title="Verify this">
                         <i class="fas fa-flask"></i>
                     </button>
                     <a href="${path}" download class="btn-icon download" title="Download">
@@ -374,9 +396,41 @@
             return div;
         }
 
-        function testSample(user, imagePath) {
+        // Event delegation for signature actions (CSP-compliant)
+        document.addEventListener('click', function (e) {
+            const target = e.target.closest('[data-action]');
+            if (!target) return;
+
+            const action = target.dataset.action;
+
+            if (action === 'preview') {
+                e.preventDefault();
+                const path = target.dataset.path;
+                const title = target.dataset.title;
+                openPreview(path, title);
+            } else if (action === 'test') {
+                e.preventDefault();
+                const user = target.dataset.user;
+                const path = target.dataset.path;
+                handleTestSample(target, user, path);
+            }
+        });
+
+        function handleTestSample(btn, user, imagePath) {
+            // Show loading feedback
+            if (btn) {
+                btn.classList.add('loading');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            }
+
+            // Build URL with parameters (no auto-verify, user clicks analyze manually)
             const fullUrl = window.location.origin + '/' + imagePath;
-            window.location.href = `/verify?user=${user}&sample=${encodeURIComponent(fullUrl)}`;
+            const verifyUrl = `/verify?user=${encodeURIComponent(user)}&sample=${encodeURIComponent(fullUrl)}`;
+
+            // Small delay for visual feedback
+            setTimeout(() => {
+                window.location.href = verifyUrl;
+            }, 300);
         }
 
         function openPreview(path, title) {
@@ -410,45 +464,90 @@
                 testBtn.innerHTML = '<i class="fas fa-flask"></i> Verify Sample Now';
                 downloadBtn.parentNode.appendChild(testBtn);
             }
-            testBtn.onclick = () => {
-                testBtn.classList.add('verifying');
-                testBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-                setTimeout(() => testSample(currentModel, path), 400);
-            };
+
+            // Store current path for the test button (CSP-compliant)
+            testBtn.dataset.action = 'modal-test';
+            testBtn.dataset.user = currentModel;
+            testBtn.dataset.path = path;
+
+            // Reset button state
+            testBtn.classList.remove('verifying');
+            testBtn.innerHTML = '<i class="fas fa-flask"></i> Verify Sample Now';
         }
+
+        // Handle modal test button click via event delegation
+        document.addEventListener('click', function (e) {
+            const target = e.target.closest('[data-action="modal-test"]');
+            if (target) {
+                e.preventDefault();
+                target.classList.add('verifying');
+                target.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                const user = target.dataset.user;
+                const path = target.dataset.path;
+                setTimeout(() => handleTestSample(target, user, path), 400);
+            }
+        });
 
         function closeModal() {
             document.getElementById('image-modal').classList.remove('active');
             document.body.style.overflow = '';
         }
 
-        // Global Events
-        const closeBtn = document.getElementById('close-modal');
-        if (closeBtn) closeBtn.onclick = closeModal;
+        // Global Events - CSP compliant event listeners
+        document.addEventListener('DOMContentLoaded', function () {
+            // Close modal button
+            const closeBtn = document.getElementById('close-modal');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', closeModal);
+            }
 
-        const modalOverlay = document.getElementById('image-modal');
-        if (modalOverlay) {
-            modalOverlay.addEventListener('click', (e) => {
-                if (e.target.id === 'image-modal') closeModal();
+            // Close modal on overlay click
+            const modalOverlay = document.getElementById('image-modal');
+            if (modalOverlay) {
+                modalOverlay.addEventListener('click', (e) => {
+                    if (e.target.id === 'image-modal') closeModal();
+                });
+            }
+
+            // Close modal on Escape key
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') closeModal();
             });
-        }
+
+            // Initialize page
+            renderModelCards();
+
+            // Check for user parameter in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const user = urlParams.get('user');
+            if (user && modelsData.find(m => m.id === user)) {
+                // Don't update URL when loading from URL parameter
+                setTimeout(() => showModelSignatures(user, false), 300);
+            }
+
+            // Handle browser back/forward buttons
+            window.addEventListener('popstate', (event) => {
+                const urlParams = new URLSearchParams(window.location.search);
+                const user = urlParams.get('user');
+
+                if (user && modelsData.find(m => m.id === user)) {
+                    // Show model signatures without updating URL
+                    showModelSignatures(user, false);
+                } else {
+                    // Back to models list without updating URL
+                    backToModels(false);
+                }
+            });
+
+            // Trigger initial scroll check
+            setTimeout(() => window.dispatchEvent(new Event('scroll')), 100);
+        });
 
         window.addEventListener('scroll', () => {
             document.querySelectorAll('.animate-on-scroll').forEach(el => {
                 const rect = el.getBoundingClientRect();
                 if (rect.top < window.innerHeight - 50) el.classList.add('in-view');
             });
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            renderModelCards();
-            const urlParams = new URLSearchParams(window.location.search);
-            const user = urlParams.get('user');
-            if (user && modelsData.find(m => m.id === user)) {
-                setTimeout(() => showModelSignatures(user), 300);
-            }
-            // Trigger initial scroll check
-            setTimeout(() => window.dispatchEvent(new Event('scroll')), 100);
         });
     </script>
 </body>

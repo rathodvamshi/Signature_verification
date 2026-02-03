@@ -35,6 +35,38 @@
     font-size: 0.95rem;
 }
 
+.header-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.btn-cleanup {
+    padding: 8px 16px;
+    border-radius: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.btn-cleanup:hover {
+    color: #f59e0b;
+    border-color: #f59e0b;
+    background: rgba(245, 158, 11, 0.08);
+}
+
+.btn-cleanup:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 .btn-refresh {
     width: 42px;
     height: 42px;

@@ -1121,3 +1121,66 @@
 .result-card.success li i { color: #10b981; }
 .result-card.danger li i { color: #ef4444; }
 
+/* ============================================
+   SAMPLE LOADING STATES (from Models page)
+   ============================================ */
+
+/* Pre-filled input highlight animation */
+#usernameInput.prefilled {
+    animation: prefillHighlight 2s ease-out;
+    border-color: #8b5cf6 !important;
+    box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.15), 0 4px 15px rgba(139, 92, 246, 0.1) !important;
+}
+
+@keyframes prefillHighlight {
+    0% {
+        background: rgba(139, 92, 246, 0.15);
+        transform: scale(1.02);
+    }
+    50% {
+        background: rgba(139, 92, 246, 0.08);
+    }
+    100% {
+        background: transparent;
+        transform: scale(1);
+    }
+}
+
+/* Drop zone loading state when fetching sample */
+.drop-zone.loading-sample {
+    pointer-events: none;
+    border-color: #8b5cf6;
+    background: linear-gradient(145deg, rgba(139, 92, 246, 0.08), rgba(236, 72, 153, 0.05));
+}
+
+.drop-zone.loading-sample::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(139, 92, 246, 0.2), 
+        transparent);
+    animation: loadingSweep 1.5s infinite;
+}
+
+.drop-zone.loading-sample .drop-zone-idle {
+    opacity: 0.5;
+}
+
+.drop-zone.loading-sample .upload-icon-wrapper {
+    animation: pulse 1s infinite;
+}
+
+@keyframes loadingSweep {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.1); opacity: 0.8; }
+}

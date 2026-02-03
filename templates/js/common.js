@@ -293,6 +293,16 @@ const updateGlobalStats = async () => {
         const response = await fetch('/api/stats');
         const data = await response.json();
 
+        // Handle database unavailable state
+        if (data.dbStatus === 'disconnected' || data.dbStatus === 'error') {
+            console.warn('Database temporarily unavailable');
+            // Keep existing value or show placeholder
+            if (!statsEl.textContent || statsEl.textContent === '0') {
+                statsEl.textContent = '--';
+            }
+            return;
+        }
+
         // Animate counter
         const total = data.totalVerifications || 0;
         const currentNum = parseInt(statsEl.textContent) || 0;
@@ -302,6 +312,7 @@ const updateGlobalStats = async () => {
         }
     } catch (error) {
         console.error('Failed to fetch stats:', error);
+        // Don't show error to user, just keep existing content
     }
 };
 

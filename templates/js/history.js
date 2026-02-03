@@ -19,7 +19,7 @@ const HistoryState = {
         date: '',
         status: 'all'
     },
-    viewMode: 'grid',
+    viewMode: 'list', // Default to list view
     summary: { total: 0, genuine: 0, forged: 0 }
 };
 
@@ -38,6 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = '/login?next=/history';
         return;
     }
+    
+    // Load saved view mode preference BEFORE rendering (default: list)
+    loadSavedViewMode();
     
     setupEventListeners();
     await fetchHistory(1, true);
@@ -58,7 +61,8 @@ function cacheDOMElements() {
     DOM.searchInput = document.getElementById('historySearch');
     DOM.dateFilter = document.getElementById('dateFilter');
     DOM.statusFilter = document.getElementById('statusFilter');
-    DOM.refreshBtn = document.querySelector('.btn-refresh');
+    DOM.refreshBtn = document.getElementById('refreshBtn');
+    DOM.cleanupBtn = document.getElementById('cleanupBtn');
     DOM.resetBtn = document.querySelector('[data-action="reset-filters"]');
     DOM.exportBtn = document.querySelector('[data-action="export"]');
 }
@@ -103,6 +107,39 @@ function setupEventListeners() {
     DOM.refreshBtn?.addEventListener('click', () => {
         fetchHistory(1, true);
         window.AppUtils?.showToast?.('History refreshed', 'info');
+    });
+    
+    // Cleanup button - remove records with missing images
+    DOM.cleanupBtn?.addEventListener('click', async () => {
+        if (!confirm('This will remove all history records where the image file is missing. Continue?')) {
+            return;
+        }
+        
+        try {
+            DOM.cleanupBtn.disabled = true;
+            DOM.cleanupBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Cleaning...';
+            
+            const response = await fetch('/api/history/cleanup/orphaned', {
+                method: 'DELETE',
+                credentials: 'include'
+            });
+            
+            const data = await response.json();
+            
+            if (response.ok) {
+                window.AppUtils?.showToast?.(`Cleaned up ${data.deletedCount} orphaned records`, 'success');
+                // Refresh the list
+                await fetchHistory(1, true);
+            } else {
+                throw new Error(data.error || 'Cleanup failed');
+            }
+        } catch (err) {
+            console.error('Cleanup error:', err);
+            window.AppUtils?.showToast?.(err.message || 'Cleanup failed', 'error');
+        } finally {
+            DOM.cleanupBtn.disabled = false;
+            DOM.cleanupBtn.innerHTML = '<i class="fas fa-broom"></i> Cleanup';
+        }
     });
     
     // Reset filters button
@@ -498,15 +535,37 @@ function resetFilters() {
 }
 
 // ============================================
-// VIEW MODE
+// VIEW MODE (Persisted to localStorage)
 // ============================================
-function setViewMode(mode) {
-    HistoryState.viewMode = mode;
+function loadSavedViewMode() {
+    const savedMode = localStorage.getItem('historyViewMode');
+    // Use saved mode if valid, otherwise keep default ('list')
+    if (savedMode && ['grid', 'list', 'timeline'].includes(savedMode)) {
+        HistoryState.viewMode = savedMode;
+    }
+    // Update button states to match current mode
+    updateViewModeButtons();
+}
+
+function updateViewModeButtons() {
     document.querySelectorAll('.view-mode-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.mode === mode);
+        btn.classList.toggle('active', btn.dataset.mode === HistoryState.viewMode);
     });
+}
+
+function setViewMode(mode) {
+    if (!['grid', 'list', 'timeline'].includes(mode)) return;
+    
+    HistoryState.viewMode = mode;
+    updateViewModeButtons();
     renderHistory();
+    
+    // Save preference to localStorage
     localStorage.setItem('historyViewMode', mode);
+    
+    // Show feedback
+    const modeNames = { grid: 'Grid', list: 'List', timeline: 'Timeline' };
+    window.AppUtils?.showToast?.(`Switched to ${modeNames[mode]} view`, 'info');
 }
 
 // ============================================
@@ -614,8 +673,4 @@ function initAnimations() {
     }, { threshold: 0.1 });
     
     document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el));
-    
-    // Load saved view mode
-    const saved = localStorage.getItem('historyViewMode');
-    if (saved) setViewMode(saved);
 }

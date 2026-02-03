@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="View your signature verification history">
-    <title>SignatureVerify | History</title>
+    <title>Signature Verification | History</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg">
@@ -18,9 +18,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-    <!-- Stylesheets -->
-    <link rel="stylesheet" href="/css/common.css">
-    <link rel="stylesheet" href="/css/history.css">
+    <!-- Stylesheets with cache-busting -->
+    <link rel="stylesheet" href="/css/common.css?v=20260203">
+    <link rel="stylesheet" href="/css/history.css?v=20260203">
 </head>
 
 <body>
@@ -31,7 +31,7 @@
         <div class="logo">
             <img src="https://i.pinimg.com/736x/51/d2/5f/51d25f706411a2935fcf34010a12367a.jpg"
                 alt="SignatureVerify Logo">
-            <h1>SignatureVerify</h1>
+            <h1>Signature Verification</h1>
         </div>
 
         <!-- Mobile Menu Toggle -->
@@ -61,9 +61,14 @@
                 <h1 class="text-gradient">Verification History</h1>
                 <p>Track and manage your signature verification records</p>
             </div>
-            <button class="btn-refresh" title="Refresh">
-                <i class="fas fa-sync-alt"></i>
-            </button>
+            <div class="header-actions">
+                <button class="btn-cleanup" id="cleanupBtn" title="Remove records with missing images">
+                    <i class="fas fa-broom"></i> Cleanup
+                </button>
+                <button class="btn-refresh" id="refreshBtn" title="Refresh">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+            </div>
         </div>
 
         <!-- Stats Dashboard -->
@@ -130,12 +135,12 @@
                 </button>
             </div>
 
-            <!-- View Mode Toggle -->
+            <!-- View Mode Toggle (default: List view, JS loads saved preference) -->
             <div class="view-toggle">
-                <button class="view-mode-btn active" data-mode="grid" title="Grid View">
+                <button class="view-mode-btn" data-mode="grid" title="Grid View">
                     <i class="fas fa-th-large"></i>
                 </button>
-                <button class="view-mode-btn" data-mode="list" title="List View">
+                <button class="view-mode-btn active" data-mode="list" title="List View">
                     <i class="fas fa-list"></i>
                 </button>
                 <button class="view-mode-btn" data-mode="timeline" title="Timeline View">
@@ -176,8 +181,8 @@
     </div>
 
     <!-- Scripts -->
-    <script src="/js/common.js?v=20260129"></script>
-    <script src="/js/history.js?v=20260129"></script>
+    <script src="/js/common.js?v=20260203"></script>
+    <script src="/js/history.js?v=20260203"></script>
 </body>
 
 </html>
